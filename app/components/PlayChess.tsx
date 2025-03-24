@@ -20,7 +20,23 @@ export default function PlayChess() {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io('http://localhost:3001');
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const newSocket = io(socketUrl, {
+      path: '/api/socket',
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+
     setSocket(newSocket);
 
     // Socket event listeners
