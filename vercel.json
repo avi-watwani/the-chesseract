@@ -27,6 +27,6 @@
     }
   },
   "build": {
-    "ignoreCommand": "if [ \"$VERCEL_GIT_BRANCH\" != \"main\" ]; then exit 1; fi"
+    "ignoreCommand": "if [ \"$VERCEL_GIT_BRANCH\" != \"TC-main-play-online\" ]; then exit 1; fi"
   }
 }
