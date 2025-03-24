@@ -48,7 +48,7 @@ export default function Home() {
           <p className="text-gray-300 text-lg mb-8">
             Experience our interactive training board. Select a piece to move it and explore basic chess movements.
           </p>
-          <div className="max-w-3xl mx-auto bg-gray-900/50 p-8 rounded-xl backdrop-blur-sm">
+          <div className="max-w-3xl mx-auto bg-gray-900/50 p-4 rounded-xl backdrop-blur-sm">
             <ChessBoard />
           </div>
         </div>

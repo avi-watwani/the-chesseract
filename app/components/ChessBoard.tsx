@@ -90,7 +90,7 @@ const ChessBoard: React.FC = () => {
   };
   
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-xl mx-auto">
       <div className="aspect-square relative shadow-2xl rounded-lg overflow-hidden border-4 border-gray-800">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 opacity-50"></div>
         <div className="relative grid grid-cols-8">
