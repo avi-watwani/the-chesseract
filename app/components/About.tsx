@@ -42,15 +42,15 @@ const About = () => {
 
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="lg:w-1/2">
-            <div className="relative">
-              <div className="bg-gradient-to-tr from-primary-blue/20 to-primary-blue-dark/40 p-1 rounded-lg shadow-xl">
-                <div className="relative aspect-video rounded-lg overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('/images/chess-class.jpg')] bg-cover bg-center"></div>
-                  <div className="absolute inset-0 bg-secondary-black/30"></div>
+            <div className="relative group">
+              <div className="bg-gradient-to-tr from-primary-blue/30 to-primary-blue-dark/50 p-1.5 rounded-lg shadow-xl transition-transform duration-500 ease-out hover:scale-[1.02]">
+                <div className="relative aspect-[16/10] rounded-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('/images/chess-class.jpg')] bg-cover bg-center transform transition-transform duration-700 group-hover:scale-105"></div>
+                  <div className="absolute inset-0 bg-secondary-black/20 transition-opacity duration-300 group-hover:bg-secondary-black/10"></div>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 border-4 border-primary-blue/30 rounded-lg"></div>
-              <div className="absolute -top-6 -left-6 w-32 h-32 border-4 border-primary-blue/30 rounded-lg"></div>
+              <div className="absolute -bottom-6 -right-6 w-32 h-32 border-4 border-primary-blue/40 rounded-lg transform rotate-3 transition-all duration-500 group-hover:rotate-6"></div>
+              <div className="absolute -top-6 -left-6 w-32 h-32 border-4 border-primary-blue/40 rounded-lg transform -rotate-3 transition-all duration-500 group-hover:-rotate-6"></div>
             </div>
           </div>
 
