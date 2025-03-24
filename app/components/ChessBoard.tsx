@@ -10,7 +10,7 @@ import { Piece, Square } from '../types/chess';
 import { AlertCircle } from 'lucide-react';
 
 interface ChessBoardProps {
-  socket?: typeof Socket;
+  socket?: Socket;
   gameId?: string;
   playerColor?: 'white' | 'black';
   isPlayable?: boolean;
