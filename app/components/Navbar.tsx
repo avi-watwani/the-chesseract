@@ -73,7 +73,7 @@ const Navbar = () => {
             <Link href="/coaches" className="text-white hover:text-blue-400 transition-colors">
               Coaches
             </Link>
-            <Link href="#blog" className="text-white hover:text-blue-400 transition-colors">
+            <Link href="/blog" className="text-white hover:text-blue-400 transition-colors">
               Blog
             </Link>
             <Link href="/contact" className="text-white hover:text-blue-400 transition-colors">
@@ -171,7 +171,7 @@ const Navbar = () => {
             Coaches
           </Link>
           <Link 
-            href="#blog"
+            href="/blog"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
           >
             Blog
