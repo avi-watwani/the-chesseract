@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
+import { ChessPieces } from './ChessPieces';
 
 type Piece = {
   type: 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
   color: 'white' | 'black';
 };
+
+type PieceKey = `${Piece['color']}-${Piece['type']}`;
 
 type Square = {
   piece: Piece | null;
@@ -58,10 +61,8 @@ const ChessBoard: React.FC = () => {
     const row = 8 - parseInt(rank);
     
     if (selectedSquare === position) {
-      // Deselect if clicking the same square
       setSelectedSquare(null);
     } else if (selectedSquare) {
-      // Move piece if a square was already selected
       const [prevFile, prevRank] = selectedSquare.split('');
       const prevCol = prevFile.charCodeAt(0) - 97;
       const prevRow = 8 - parseInt(prevRank);
@@ -73,7 +74,6 @@ const ChessBoard: React.FC = () => {
       setBoard(newBoard);
       setSelectedSquare(null);
     } else if (board[row][col].piece) {
-      // Select square if it has a piece
       setSelectedSquare(position);
     }
   };
@@ -81,31 +81,19 @@ const ChessBoard: React.FC = () => {
   const renderPiece = (piece: Piece | null) => {
     if (!piece) return null;
     
-    const symbols: Record<string, string> = {
-      'white-pawn': '♙',
-      'white-rook': '♖',
-      'white-knight': '♘',
-      'white-bishop': '♗',
-      'white-queen': '♕',
-      'white-king': '♔',
-      'black-pawn': '♟',
-      'black-rook': '♜',
-      'black-knight': '♞',
-      'black-bishop': '♝',
-      'black-queen': '♛',
-      'black-king': '♚',
-    };
-    
-    const key = `${piece.color}-${piece.type}`;
+    const key = `${piece.color}-${piece.type}` as PieceKey;
     return (
-      <span className="text-4xl">{symbols[key]}</span>
+      <div className="w-full h-full flex items-center justify-center">
+        {ChessPieces[key]}
+      </div>
     );
   };
   
   return (
-    <div className="w-full max-w-md mx-auto p-4">
-      <div className="border-2 border-gray-700 rounded">
-        <div className="grid grid-cols-8">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="aspect-square relative shadow-2xl rounded-lg overflow-hidden border-4 border-gray-800">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 opacity-50"></div>
+        <div className="relative grid grid-cols-8">
           {board.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               {row.map((square, colIndex) => {
@@ -116,13 +104,20 @@ const ChessBoard: React.FC = () => {
                   <div
                     key={square.position}
                     className={`
-                      flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16
-                      ${isLightSquare ? 'bg-chess-100' : 'bg-chess-800'}
-                      ${isSelected ? 'ring-2 ring-inset ring-blue-500' : ''}
-                      cursor-pointer
+                      aspect-square flex items-center justify-center
+                      ${isLightSquare ? 'bg-[#E8D0AA]' : 'bg-[#B58863]'}
+                      ${isSelected ? 'ring-4 ring-blue-400 ring-opacity-50 ring-inset' : ''}
+                      ${square.piece ? 'hover:bg-yellow-400/20' : ''}
+                      transition-colors duration-200 cursor-pointer
+                      relative
                     `}
                     onClick={() => handleSquareClick(square.position)}
                   >
+                    <div className={`
+                      absolute inset-0 opacity-0 group-hover:opacity-100
+                      transition-opacity duration-200
+                      ${isSelected ? 'bg-blue-400/20' : ''}
+                    `}></div>
                     {renderPiece(square.piece)}
                   </div>
                 );
@@ -130,6 +125,13 @@ const ChessBoard: React.FC = () => {
             </React.Fragment>
           ))}
         </div>
+      </div>
+      
+      {/* Board coordinates */}
+      <div className="flex justify-between px-4 mt-2 text-gray-400">
+        {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(file => (
+          <span key={file} className="text-sm">{file}</span>
+        ))}
       </div>
     </div>
   );

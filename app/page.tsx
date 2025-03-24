@@ -44,9 +44,13 @@ export default function Home() {
         </div>
         
         <div className="p-6 glassmorphism rounded-xl">
-          <h2 className="text-2xl font-bold mb-6">Interactive Chess Board</h2>
-          <p className="mb-6">Try out our interactive chess board below. Click on a piece to select it, then click on another square to move it.</p>
-          <ChessBoard />
+          <h2 className="text-3xl font-bold mb-4">Interactive Chess Board</h2>
+          <p className="text-gray-300 text-lg mb-8">
+            Experience our interactive training board. Select a piece to move it and explore basic chess movements.
+          </p>
+          <div className="max-w-3xl mx-auto bg-gray-900/50 p-8 rounded-xl backdrop-blur-sm">
+            <ChessBoard />
+          </div>
         </div>
       </div>
     </PageContainer>
