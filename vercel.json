@@ -18,7 +18,7 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_SOCKET_URL": "https://your-vercel-domain.vercel.app"
+    "NEXT_PUBLIC_SOCKET_URL": "https://thechesseract.com"
   },
   "functions": {
     "api/socket": {
