@@ -70,6 +70,9 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
+            <Link href="/play" className="text-white hover:text-blue-400 transition-colors">
+              Play
+            </Link>
             <Link href="/coaches" className="text-white hover:text-blue-400 transition-colors">
               Coaches
             </Link>
@@ -164,6 +167,12 @@ const Navbar = () => {
               Advanced Analysis
             </Link>
           </div>
+          <Link 
+            href="/play"
+            className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+          >
+            Play
+          </Link>
           <Link 
             href="/coaches"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
