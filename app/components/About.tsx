@@ -27,7 +27,7 @@ const About = () => {
   ]
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-secondary-black to-secondary-black/90 text-white">
+    <section id="about" className="py-12 bg-gradient-to-b from-secondary-black to-secondary-black/90 text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-montserrat font-bold mb-4">About The Chesseract</h2>
