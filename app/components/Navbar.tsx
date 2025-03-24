@@ -55,16 +55,16 @@ const Navbar = () => {
               </button>
               <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-1">
-                  <Link href="#beginner" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                  <Link href="/courses/beginner-fundamentals" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Beginner Fundamentals
                   </Link>
-                  <Link href="#intermediate" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                  <Link href="/courses/opening-mastery" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Opening Mastery
                   </Link>
-                  <Link href="#advanced" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                  <Link href="/courses/tactical-patterns" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Tactical Patterns
                   </Link>
-                  <Link href="#master" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                  <Link href="/courses/advanced-analysis" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Advanced Analysis
                   </Link>
                 </div>
@@ -140,25 +140,25 @@ const Navbar = () => {
           </button>
           <div className="pl-4">
             <Link 
-              href="#beginner"
+              href="/courses/beginner-fundamentals"
               className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
             >
               Beginner Fundamentals
             </Link>
             <Link 
-              href="#intermediate"
+              href="/courses/opening-mastery"
               className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
             >
               Opening Mastery
             </Link>
             <Link 
-              href="#advanced"
+              href="/courses/tactical-patterns"
               className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
             >
               Tactical Patterns
             </Link>
             <Link 
-              href="#master"
+              href="/courses/advanced-analysis"
               className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
             >
               Advanced Analysis

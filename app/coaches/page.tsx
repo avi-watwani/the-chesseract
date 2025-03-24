@@ -37,50 +37,6 @@ const coaches: Coach[] = [
     longBio: "Grandmaster David Johnson is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters. David's teaching approach focuses on understanding the principles behind moves rather than memorizing variations.",
     image: "/images/coach-2.jpg",
     achievements: ["Founder of Chess Academy", "Top 100 in World Rankings"]
-  },
-  {
-    id: "sophia-chen",
-    name: "Sophia Chen",
-    rating: 2350,
-    fideRating: 2290,
-    title: "FIDE Master",
-    shortBio: "Specializes in beginner to intermediate skill development",
-    longBio: "Sophia Chen is a FIDE Master who specializes in teaching beginners and intermediate players. Her structured curriculum and patient teaching style make complex concepts accessible to players of all ages. Sophia is passionate about introducing more people to the beautiful game of chess.",
-    image: "/images/coach-3.jpg",
-    achievements: ["Youth Chess Ambassador", "Best Chess Educator Award"]
-  },
-  {
-    id: "michael-rodriguez",
-    name: "Michael Rodriguez",
-    rating: 2550,
-    fideRating: 2510,
-    title: "International Master",
-    shortBio: "Tactical genius with expertise in complex middlegame positions",
-    longBio: "International Master Michael Rodriguez is known for his tactical prowess and deep understanding of complex middlegame positions. He has authored several chess books and created popular chess courses. Michael's energetic teaching style keeps students engaged while presenting sophisticated concepts.",
-    image: "/images/coach-4.jpg",
-    achievements: ["Author of 5 Chess Books", "Online Chess Content Creator"]
-  },
-  {
-    id: "elena-petrova",
-    name: "Elena Petrova",
-    rating: 2750,
-    fideRating: 2690,
-    title: "Grandmaster",
-    shortBio: "Former World Championship Candidate with strategic mastery",
-    longBio: "Grandmaster Elena Petrova is a former World Championship Candidate known for her strategic mastery and endgame technique. She has coached national teams and elite players. Elena's analytical approach helps students develop a deep understanding of chess principles and improve their decision-making process.",
-    image: "/images/coach-5.jpg",
-    achievements: ["World Championship Candidate", "Coach of Olympic Gold Team"]
-  },
-  {
-    id: "james-wilson",
-    name: "James Wilson",
-    rating: 2400,
-    fideRating: 2360,
-    title: "International Master",
-    shortBio: "Chess psychologist focused on mental training and competition preparation",
-    longBio: "International Master James Wilson combines his chess expertise with a background in sports psychology. He specializes in mental training, competition preparation, and overcoming psychological barriers in chess. James has helped numerous players overcome performance anxiety and reach their full potential.",
-    image: "/images/coach-6.jpg",
-    achievements: ["Chess Psychology Pioneer", "Mental Training Specialist"]
   }
 ];
 
@@ -147,6 +103,41 @@ export default function CoachesPage() {
               </div>
             </Link>
           ))}
+
+          {/* Coming Soon Card */}
+          <div className="glassmorphism rounded-xl overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 opacity-50"></div>
+            <div className="text-center pt-6 pb-2">
+              <h2 className="text-xl font-bold">More Masters Coming Soon</h2>
+            </div>
+            <div className="p-6 flex flex-col items-center">
+              <div className="aspect-square w-40 h-40 relative rounded-full overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 mb-4 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-gray-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+              </div>
+
+              <div className="space-y-4 text-center">
+                <p className="text-gray-300 text-lg">
+                  We're expanding our team of expert coaches
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <span className="bg-blue-600/20 text-blue-300 text-sm px-3 py-1 rounded-full">Grandmasters</span>
+                  <span className="bg-purple-600/20 text-purple-300 text-sm px-3 py-1 rounded-full">International Masters</span>
+                  <span className="bg-indigo-600/20 text-indigo-300 text-sm px-3 py-1 rounded-full">FIDE Masters</span>
+                </div>
+                <p className="text-gray-400 text-sm mt-4">
+                  Stay tuned for new additions to our coaching team
+                </p>
+              </div>
+
+              <div className="mt-8 w-full">
+                <Link href="/contact" className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 py-2 rounded-md font-medium transition-all duration-300">
+                  Get Notified
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="text-center mt-16">
