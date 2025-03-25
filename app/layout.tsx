@@ -4,7 +4,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 
 export const metadata: Metadata = {
-  title: 'The Chesseract | Chess Training & Coaching',
+  title: 'The Chesseract',
   description: 'Elevate your chess game with our multidimensional approach to learning and mastery.',
 }
 

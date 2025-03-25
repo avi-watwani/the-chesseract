@@ -7,6 +7,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     message: '',
     newsletter: false
@@ -34,6 +35,7 @@ const Contact = () => {
       setFormData({
         name: '',
         email: '',
+        phone: '',
         subject: '',
         message: '',
         newsletter: false
@@ -65,7 +67,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1 text-white">Email</h4>
-                    <p className="text-gray-300">info@thechesseract.com</p>
+                    <p className="text-gray-300">contact@thechesseract.com</p>
                   </div>
                 </div>
                 
@@ -134,6 +136,7 @@ const Contact = () => {
                       name="name" 
                       value={formData.name}
                       onChange={handleChange}
+                      placeholder="Enter your full name"
                       className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-white"
                       required
                     />
@@ -146,6 +149,20 @@ const Contact = () => {
                       name="email" 
                       value={formData.email}
                       onChange={handleChange}
+                      placeholder="Enter your email address"
+                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      id="phone" 
+                      name="phone" 
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+91 9876543210"
                       className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-white"
                       required
                     />
@@ -160,6 +177,7 @@ const Contact = () => {
                     name="subject" 
                     value={formData.subject}
                     onChange={handleChange}
+                    placeholder="What is this message about?"
                     className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-white"
                     required
                   />
@@ -173,6 +191,7 @@ const Contact = () => {
                     rows={6}
                     value={formData.message}
                     onChange={handleChange}
+                    placeholder="Type your message here..."
                     className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-white"
                     required
                   ></textarea>
@@ -195,10 +214,10 @@ const Contact = () => {
                 <div>
                   <button 
                     type="submit" 
-                    className={`inline-flex items-center justify-center w-full sm:w-auto px-8 py-3 rounded-md text-white font-semibold transition-colors ${
+                    className={`inline-flex items-center justify-center w-full sm:w-auto px-8 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 ${
                       isSubmitted 
-                      ? 'bg-green-600 hover:bg-green-700' 
-                      : 'bg-primary-blue hover:bg-primary-blue-dark'
+                      ? 'bg-green-500 hover:bg-green-600' 
+                      : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
                     }`}
                   >
                     {isSubmitted ? (
