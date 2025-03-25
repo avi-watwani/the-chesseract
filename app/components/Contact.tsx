@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Phone, MapPin, Send, Check } from 'lucide-react'
+import { Mail, Phone, MapPin, Send, Check, Loader2 } from 'lucide-react'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ const Contact = () => {
   })
 
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target
@@ -27,7 +28,7 @@ const Contact = () => {
     e.preventDefault()
     
     try {
-      setIsSubmitted(true)
+      setIsLoading(true)
       
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -40,6 +41,9 @@ const Contact = () => {
       if (!response.ok) {
         throw new Error('Failed to send message')
       }
+
+      setIsLoading(false)
+      setIsSubmitted(true)
 
       // Reset form after successful submission
       setTimeout(() => {
@@ -55,6 +59,7 @@ const Contact = () => {
       }, 3000)
     } catch (error) {
       console.error('Submission error:', error)
+      setIsLoading(false)
       setIsSubmitted(false)
       alert('Failed to send message. Please try again.')
     }
@@ -231,13 +236,19 @@ const Contact = () => {
                 <div>
                   <button 
                     type="submit" 
-                    className={`inline-flex items-center justify-center w-full sm:w-auto px-8 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    disabled={isLoading}
+                    className={`inline-flex items-center justify-center w-full sm:w-auto px-8 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none ${
                       isSubmitted 
                       ? 'bg-green-500 hover:bg-green-600' 
                       : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
                     }`}
                   >
-                    {isSubmitted ? (
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Sending...
+                      </>
+                    ) : isSubmitted ? (
                       <>
                         <Check className="mr-2 h-5 w-5" />
                         Message Sent!
