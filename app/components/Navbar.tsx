@@ -43,57 +43,51 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-white hover:text-blue-400 transition-colors">
-              Home
-            </Link>
-            <Link href="/about" className="text-white hover:text-blue-400 transition-colors">
-              About
+            <Link href="/play" className="text-white hover:text-blue-400 transition-colors">
+              Play
             </Link>
             <div className="relative group">
               <button className="flex items-center text-white hover:text-blue-400 transition-colors">
-                Courses <ChevronDown className="ml-1 h-4 w-4" />
+                Learn <ChevronDown className="ml-1 h-4 w-4" />
               </button>
               <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-1">
-                  <Link href="/courses/beginner-fundamentals" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
-                    Beginner Fundamentals
+                  <Link href="/coaches" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                    Find your Coach
                   </Link>
-                  <Link href="/courses/opening-mastery" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
-                    Opening Mastery
+                  <Link href="/analysis" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                    Analysis Board
                   </Link>
-                  <Link href="/courses/tactical-patterns" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
-                    Tactical Patterns
-                  </Link>
-                  <Link href="/courses/advanced-analysis" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
-                    Advanced Analysis
+                  <Link href="/board-editor" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                    Board Editor
                   </Link>
                 </div>
               </div>
             </div>
-            <Link href="/play" className="text-white hover:text-blue-400 transition-colors">
-              Play
-            </Link>
-            <Link href="/coaches" className="text-white hover:text-blue-400 transition-colors">
-              Coaches
+            <Link href="/shop" className="text-white hover:text-blue-400 transition-colors">
+              Shop
             </Link>
             <Link href="/blog" className="text-white hover:text-blue-400 transition-colors">
               Blog
+            </Link>
+            <Link href="/about" className="text-white hover:text-blue-400 transition-colors">
+              About
             </Link>
             <Link href="/contact" className="text-white hover:text-blue-400 transition-colors">
               Contact
             </Link>
           </nav>
 
-          {/* Login/Signup */}
+          {/* Login/ Signup */}
           <div className="hidden md:flex items-center space-x-4">
             <Link 
-              href="#login" 
+              href="/login"
               className="text-white hover:text-blue-400 transition-colors"
             >
               Log In
             </Link>
             <Link
-              href="#signup"
+              href="/register"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Sign Up
