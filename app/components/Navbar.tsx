@@ -7,6 +7,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLearnOpen, setIsLearnOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +27,10 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const toggleLearnMenu = () => {
+    setIsLearnOpen(!isLearnOpen);
   };
 
   return (
@@ -87,7 +92,7 @@ const Navbar = () => {
               Log In
             </Link>
             <Link
-              href="/register"
+              href="/signup"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Sign Up
@@ -117,67 +122,57 @@ const Navbar = () => {
       >
         <div className="px-2 pt-2 pb-3 space-y-1">
           <Link 
-            href="/"
-            className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
-          >
-            Home
-          </Link>
-          <Link 
-            href="/about"
-            className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
-          >
-            About
-          </Link>
-          <button
-            className="flex items-center justify-between w-full px-3 py-2 text-white hover:bg-gray-800 rounded-md"
-            onClick={() => {}}
-          >
-            Courses
-            <ChevronDown className="h-4 w-4" />
-          </button>
-          <div className="pl-4">
-            <Link 
-              href="/courses/beginner-fundamentals"
-              className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
-            >
-              Beginner Fundamentals
-            </Link>
-            <Link 
-              href="/courses/opening-mastery"
-              className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
-            >
-              Opening Mastery
-            </Link>
-            <Link 
-              href="/courses/tactical-patterns"
-              className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
-            >
-              Tactical Patterns
-            </Link>
-            <Link 
-              href="/courses/advanced-analysis"
-              className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
-            >
-              Advanced Analysis
-            </Link>
-          </div>
-          <Link 
             href="/play"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
           >
             Play
           </Link>
+          <div>
+            <button
+              className="flex items-center justify-between w-full px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+              onClick={toggleLearnMenu}
+            >
+              Learn
+              <ChevronDown className={`h-4 w-4 transform transition-transform ${isLearnOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`pl-4 space-y-1 ${isLearnOpen ? 'block' : 'hidden'}`}>
+              <Link 
+                href="/coaches"
+                className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+              >
+                Find your Coach
+              </Link>
+              <Link 
+                href="/analysis"
+                className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+              >
+                Analysis Board
+              </Link>
+              <Link 
+                href="/board-editor"
+                className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+              >
+                Board Editor
+              </Link>
+            </div>
+          </div>
           <Link 
-            href="/coaches"
+            href="/shop"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
           >
-            Coaches
+            Shop
           </Link>
           <Link 
             href="/blog"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
           >
             Blog
+          </Link>
+          <Link 
+            href="/about"
+            className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+          >
+            About
           </Link>
           <Link 
             href="/contact"
@@ -187,13 +182,13 @@ const Navbar = () => {
           </Link>
           <div className="pt-4 pb-3 border-t border-gray-700">
             <Link 
-              href="#login"
+              href="/login"
               className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
             >
               Log In
             </Link>
             <Link 
-              href="#signup"
+              href="/signup"
               className="block px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md mt-2"
             >
               Sign Up
@@ -205,4 +200,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;
