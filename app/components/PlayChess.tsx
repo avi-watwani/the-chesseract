@@ -22,31 +22,33 @@ export default function PlayChess() {
     // Initialize socket connection
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
     const newSocket = io(socketUrl, {
-      path: '/api/socket',
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
-      reconnectionDelay: 1000
+      reconnectionDelay: 1000,
+      timeout: 10000
     });
 
     newSocket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+      setSocket(newSocket);
     });
 
     newSocket.on('connect_error', (error) => {
       console.error('WebSocket connection error:', error);
+      setSearchingForGame(false);
     });
 
-    setSocket(newSocket);
+    newSocket.on('disconnect', (reason) => {
+      setSearchingForGame(false);
+    });
 
-    // Socket event listeners
     newSocket.on('gameFound', ({ gameId, color, opponent }) => {
       setGameState({
         status: 'playing',
         playerColor: color,
         opponentName: opponent,
         gameId,
-        timeLeft: 600 // 10 minutes in seconds
+        timeLeft: 600
       });
       setSearchingForGame(false);
     });
@@ -59,19 +61,24 @@ export default function PlayChess() {
     });
 
     return () => {
-      newSocket.close();
+      if (newSocket) {
+        newSocket.disconnect();
+      }
     };
   }, []);
 
   const findGame = () => {
-    if (socket) {
+    if (socket && socket.connected) {
       setSearchingForGame(true);
       socket.emit('findGame');
+    } else {
+      console.error('Socket not connected');
+      setSearchingForGame(false);
     }
   };
 
   const cancelSearch = () => {
-    if (socket) {
+    if (socket && socket.connected) {
       setSearchingForGame(false);
       socket.emit('cancelSearch');
     }

@@ -5,8 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -27,7 +28,10 @@ const waitingPlayers: Player[] = [];
 const activeGames = new Map<string, Game>();
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  // Add connection error handling
+  io.on('connect_error', (err) => {
+    console.error('Socket connection error:', err);
+  });
 
   socket.on('findGame', () => {
     const player: Player = {
