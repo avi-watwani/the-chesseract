@@ -72,7 +72,7 @@ const Contact = () => {
           <h2 className="text-3xl md:text-4xl font-montserrat font-bold mb-4 text-white">Contact Us</h2>
           <div className="w-20 h-1 bg-primary-blue mx-auto mb-8"></div>
           <p className="max-w-3xl mx-auto text-lg text-gray-300">
-            Have questions about our programs or want to schedule a consultation? 
+            Have questions about our programs or want to schedule a consultation? <br />
             Get in touch with our team and we'll help you find the perfect training solution.
           </p>
         </div>
