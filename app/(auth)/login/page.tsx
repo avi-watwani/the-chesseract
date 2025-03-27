@@ -3,7 +3,20 @@ import Image from 'next/image'
 
 export default function Login() {
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex min-h-screen bg-black relative">
+      {/* Home Button */}
+      <div className="fixed top-8 right-8 z-50">
+        <Link 
+          href="/" 
+          className="inline-flex items-center px-6 py-3 bg-white text-black hover:bg-white/90 rounded-lg font-medium transition-colors shadow-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Home
+        </Link>
+      </div>
+
       {/* Left side - Image */}
       <div className="hidden lg:block w-1/2 relative bg-white">
         <Image 
