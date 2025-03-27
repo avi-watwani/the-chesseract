@@ -1,5 +1,5 @@
-import PageContainer from '../components/PageContainer';
-import PlayChess from '../components/PlayChess';
+import PageContainer from '../../components/PageContainer';
+import PlayChess from '../../components/PlayChess';
 
 export default function PlayPage() {
   return (

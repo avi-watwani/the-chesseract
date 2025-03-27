@@ -1,4 +1,4 @@
-import PageContainer from '../components/PageContainer';
+import PageContainer from '../../components/PageContainer';
 
 export default function BlogPage() {
   return (
@@ -6,7 +6,7 @@ export default function BlogPage() {
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-center mb-4">The Chesseract Blog</h1>
         <p className="text-gray-300 text-center max-w-3xl mx-auto mb-12">
-          Stay tuned for insightful articles, game analysis, and chess improvement tips.
+          Stay updated with the latest chess strategies, tournament news, and expert insights.
         </p>
         
         <div className="max-w-2xl mx-auto">

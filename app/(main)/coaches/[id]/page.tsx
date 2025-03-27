@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import PageContainer from '../../components/PageContainer';
+import PageContainer from '../../../components/PageContainer';
 
 // Coach type definition (same as in coaches/page.tsx)
 type Coach = {
