@@ -40,16 +40,14 @@ export default function HomePage() {
                     </svg>
                   </Link>
                 </div>
-                <div className="flex-shrink-0 relative w-[450px] h-[450px] ml-auto">
-                  <div className="absolute inset-0 bg-gray-800 rounded-xl overflow-hidden flex items-center justify-center">
-                    <Image
-                      src="/images/chess-piece-learn.png"
-                      alt="Chess Learning"
-                      width={350}
-                      height={350}
-                      className="object-contain"
-                    />
-                  </div>
+                <div className="flex-shrink-0 relative w-[450px] h-[400px] ml-auto flex items-center justify-center">
+                  <Image
+                    src="/images/chess-piece-learn.png"
+                    alt="Chess Learning"
+                    width={400}
+                    height={400}
+                    className="object-contain"
+                  />
                 </div>
               </div>
             </div>
