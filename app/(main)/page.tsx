@@ -9,35 +9,48 @@ export default function HomePage() {
         {/* Learn Section */}
         <section className="mb-32">
           <div className="relative">
-            <h2 className="text-8xl font-bold text-zinc-900 opacity-10 absolute -top-10 left-0">
-              Learn
-            </h2>
-            <div className="bg-white text-black rounded-3xl p-8 flex items-center justify-between overflow-hidden">
-              <div className="max-w-xl">
-                <h3 className="text-3xl font-bold mb-4">Elevate Your Chess:</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Unleashing Mastery Via Diverse Learning Methods
-                </p>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Unleash Your Potential With Chess Education That Fuses Innovation And Tradition. Our Methodology Combines Varied Techniques To Simplify Learning, Nurturing A Strategic Mindset That Ensures Your Growth As A Confident And Skilled Chess Player.
-                </p>
-                <Link 
-                  href="/learn" 
-                  className="inline-flex items-center bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition-colors"
-                >
-                  Elevate My Game
-                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
+            {/* Learn Card with Extension */}
+            <div className="relative mt-24">
+              {/* The heading extension with slope on right side */}
+              <div className="absolute left-0 -top-24 z-10">
+                <div className="bg-white text-black p-8 pl-12 rounded-tr-[80px] rounded-tl-3xl">
+                  <h2 className="text-6xl font-bold">
+                    Learn
+                  </h2>
+                </div>
               </div>
-              <div className="relative w-80 h-80">
-                <Image
-                  src="/images/chess-piece-learn.png"
-                  alt="Chess Learning"
-                  fill
-                  className="object-cover rounded-xl"
-                />
+              
+              {/* Main content card */}
+              <div className="bg-white text-black rounded-3xl p-12 flex items-center">
+                <div className="max-w-xl pl-4 mt-8">
+                  <h3 className="text-4xl font-bold mb-4">Elevate Your Chess:</h3>
+                  <p className="text-gray-600 mb-6 text-xl">
+                    Unleashing Mastery Via Diverse Learning Methods
+                  </p>
+                  <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                    Unleash Your Potential With Chess Education That Fuses Innovation And Tradition. Our Methodology Combines Varied Techniques To Simplify Learning, Nurturing A Strategic Mindset That Ensures Your Growth As A Confident And Skilled Chess Player.
+                  </p>
+                  <Link 
+                    href="/learn" 
+                    className="inline-flex items-center bg-black text-white px-8 py-4 rounded-lg hover:bg-gray-900 transition-colors font-medium"
+                  >
+                    Elevate My Game
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </Link>
+                </div>
+                <div className="flex-shrink-0 relative w-[450px] h-[450px] ml-auto">
+                  <div className="absolute inset-0 bg-gray-800 rounded-xl overflow-hidden flex items-center justify-center">
+                    <Image
+                      src="/images/chess-piece-learn.png"
+                      alt="Chess Learning"
+                      width={350}
+                      height={350}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
