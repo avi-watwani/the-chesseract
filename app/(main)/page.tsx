@@ -11,18 +11,38 @@ export default function HomePage() {
           <div className="relative">
             {/* Learn Card with Extension */}
             <div className="relative mt-24">
-              {/* The heading extension with slope on right side */}
+              {/* Extension for Learn heading */}
               <div className="absolute left-0 -top-24 z-10">
-                <div className="bg-white text-black p-8 pl-12 rounded-tr-[80px] rounded-tl-3xl">
-                  <h2 className="text-6xl font-bold">
+                <div style={{ 
+                  background: 'white', 
+                  color: 'black',
+                  padding: '24px 60px 24px 40px',
+                  borderTopLeftRadius: '24px',
+                  borderTopRightRadius: '0px',
+                  borderBottomRightRadius: '0px',
+                  borderBottomLeftRadius: '0px',
+                  clipPath: 'polygon(0% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                }}>
+                  <h2 className="text-5xl font-bold">
                     Learn
                   </h2>
                 </div>
               </div>
               
               {/* Main content card */}
-              <div className="bg-white text-black rounded-3xl p-12 flex items-center">
-                <div className="max-w-xl pl-4 mt-8">
+              <div style={{ 
+                background: 'white', 
+                color: 'black',
+                padding: '48px',
+                borderTopLeftRadius: '0px',
+                borderTopRightRadius: '24px',
+                borderBottomRightRadius: '24px',
+                borderBottomLeftRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                marginTop: '0px'
+              }}>
+                <div className="max-w-xl pl-4 mt-12">
                   <h3 className="text-4xl font-bold mb-4">Elevate Your Chess:</h3>
                   <p className="text-gray-600 mb-6 text-xl">
                     Unleashing Mastery Via Diverse Learning Methods
@@ -40,12 +60,12 @@ export default function HomePage() {
                     </svg>
                   </Link>
                 </div>
-                <div className="flex-shrink-0 relative w-[450px] h-[400px] ml-auto flex items-center justify-center">
+                <div className="flex-shrink-0 relative w-[450px] h-[350px] ml-auto flex items-center justify-center">
                   <Image
                     src="/images/chess-piece-learn.png"
                     alt="Chess Learning"
-                    width={400}
-                    height={400}
+                    width={350}
+                    height={350}
                     className="object-contain"
                   />
                 </div>
@@ -55,10 +75,10 @@ export default function HomePage() {
 
           {/* Chess Learning Cards */}
           <div className="grid grid-cols-3 gap-6 mt-8">
-            <div className="bg-zinc-900 p-6 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer">
+            <div className="bg-zinc-900 p-6 rounded-tr-[80px] rounded-bl-3xl rounded-br-3xl hover:bg-zinc-800 transition-colors cursor-pointer">
               <h4 className="text-xl font-semibold mb-2">Understand The King's Indian Defense.</h4>
             </div>
-            <div className="bg-zinc-900 p-6 rounded-xl col-span-1 hover:bg-zinc-800 transition-colors cursor-pointer">
+            <div className="bg-zinc-900 p-6 rounded-tr-[80px] rounded-bl-3xl rounded-br-3xl col-span-1 hover:bg-zinc-800 transition-colors cursor-pointer">
               <h4 className="text-xl font-semibold mb-2">Master Queen's Gambit</h4>
               <div className="relative w-full h-48 mt-4">
                 <Image
