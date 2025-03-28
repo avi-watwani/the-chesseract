@@ -349,7 +349,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex-shrink-0 relative w-[450px] h-[350px] ml-auto flex items-center justify-center">
                   <Image
-                    src="/images/chess-play.png"
+                    src="/images/chess-play.jpg"
                     alt="Play Chess"
                     width={350}
                     height={350}
@@ -368,9 +368,9 @@ export default function HomePage() {
             </div>
             <div className="bg-zinc-900 p-6 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer">
               <h4 className="text-xl font-semibold mb-2">Magnus Carlsen Epic Win</h4>
-              <div className="relative w-full h-48 mt-4">
+              <div className="relative w-full h-56 mt-4">
                 <Image
-                  src="/images/magnus-carlsen.png"
+                  src="/images/magnus-carlsen.jpeg"
                   alt="Magnus Carlsen"
                   fill
                   className="object-cover rounded-lg"
