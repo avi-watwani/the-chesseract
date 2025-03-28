@@ -80,9 +80,9 @@ export default function HomePage() {
             </div>
             <div className="bg-zinc-900 p-6 rounded-tr-[80px] rounded-bl-3xl rounded-br-3xl col-span-1 hover:bg-zinc-800 transition-colors cursor-pointer">
               <h4 className="text-xl font-semibold mb-2">Master Queen's Gambit</h4>
-              <div className="relative w-full h-48 mt-4">
+              <div className="relative w-full h-56 mt-4">
                 <Image
-                  src="/images/queens-gambit.png"
+                  src="/images/queens-gambit.jpg"
                   alt="Queen's Gambit"
                   fill
                   className="object-cover rounded-lg"
@@ -97,6 +97,7 @@ export default function HomePage() {
 
         {/* Course Levels Section */}
         <section className="mb-32">
+          <h2 className="text-4xl font-bold mb-8 text-center">Check Out Our Plans</h2> <br /><br />
           <div className="grid grid-cols-3 gap-8">
             {/* Intermediate Level Card */}
             <div className="bg-white text-black rounded-3xl p-12 hover:shadow-xl transition-shadow flex flex-col min-h-[800px]">
@@ -177,10 +178,10 @@ export default function HomePage() {
                 <div className="mb-8">
                   <div className="flex items-baseline mb-2">
                     <span className="text-purple-300 text-sm line-through">$199.00</span>
-                    <span className="ml-2 text-white text-sm font-medium">SAVE 65%</span>
+                    <span className="ml-2 text-white text-sm font-medium">SAVE 56%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">$69</span>
+                    <span className="text-5xl font-bold">$89</span>
                     <span className="text-purple-200 ml-2">/mo</span>
                   </div>
                 </div>
