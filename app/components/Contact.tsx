@@ -89,7 +89,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1 text-white">Email</h4>
-                    <p className="text-gray-300">contact@thechesseract.com</p>
+                    <p className="text-gray-300">contact@chesseractindia.com</p>
                   </div>
                 </div>
                 
