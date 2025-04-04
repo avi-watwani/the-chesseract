@@ -63,7 +63,7 @@ const Navbar = () => {
                   <Link href="/analysis" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Analysis Board
                   </Link>
-                  <Link href="/board-editor" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+                  <Link href="/editor" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
                     Board Editor
                   </Link>
                 </div>
@@ -149,7 +149,7 @@ const Navbar = () => {
                 Analysis Board
               </Link>
               <Link 
-                href="/board-editor"
+                href="/editor"
                 className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
               >
                 Board Editor
