@@ -1,28 +1,90 @@
-import PageContainer from '../../components/PageContainer';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
 
-export default function AboutPage() {
+import { useState } from 'react';
+import { Chessboard } from 'react-chessboard';
+import PageContainer from '../../components/PageContainer';
+
+export default function EditorPage() {
+  const [position, setPosition] = useState<Record<string, string>>({}); // Custom board position
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
+
+  // Handle square click for adding/removing pieces
+  const onSquareClick = (square: string) => {
+    if (selectedSquare && selectedPiece) {
+      // Move the selected piece to the clicked square
+      setPosition((prev) => {
+        const newPosition = { ...prev };
+        delete newPosition[selectedSquare]; // Remove the piece from the original square
+        newPosition[square] = selectedPiece; // Place the piece on the new square
+        return newPosition;
+      });
+      setSelectedSquare(null);
+      setSelectedPiece(null);
+    } else if (position[square]) {
+      // Select a piece from the board
+      setSelectedSquare(square);
+      setSelectedPiece(position[square]);
+    } else if (selectedPiece) {
+      // Place a new piece on the clicked square
+      setPosition((prev) => ({
+        ...prev,
+        [square]: selectedPiece,
+      }));
+      setSelectedPiece(null);
+    }
+  };
+
+  // Handle piece drag-and-drop
+  const onPieceDrop = (sourceSquare: string, targetSquare: string) => {
+    setPosition((prev) => {
+      const newPosition = { ...prev };
+      newPosition[targetSquare] = newPosition[sourceSquare]; // Move the piece
+      delete newPosition[sourceSquare]; // Remove the piece from the source square
+      return newPosition;
+    });
+    return true;
+  };
+
+  // Reset the board to an empty state
+  const resetBoard = () => {
+    setPosition({});
+  };
+
+  // Predefined pieces for adding to the board
+  const pieces = ['wP', 'wR', 'wN', 'wB', 'wQ', 'wK', 'bP', 'bR', 'bN', 'bB', 'bQ', 'bK'];
+
   return (
-    <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white">
-        <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold mb-6">Board Editor</h1>
-            <p className="text-xl text-gray-300 mb-8">
-            Create and edit your own custom boards with our easy-to-use editor.
-            </p>
-            <div className="flex justify-center mb-8">
-            <Image
-                src="/images/editor.png"
-                alt="Board Editor"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-lg"
-            />
-            </div>
-            <Link href="/editor/create" className="text-blue-500 hover:underline">
-            Start Creating Your Board
-            </Link>
+    <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white mt-10 min-h-screen flex flex-col items-center">
+      <div className="flex flex-col items-center">
+        <div className="flex justify-center mb-4">
+          <Chessboard
+            position={position} // Custom board position
+            onPieceDrop={onPieceDrop} // Drag-to-move functionality
+            onSquareClick={onSquareClick} // Click-to-move functionality
+            boardWidth={500} // Adjust the size of the board
+          />
         </div>
+        <div className="flex flex-wrap justify-center gap-4 mb-4">
+          {pieces.map((piece) => (
+            <button
+              key={piece}
+              onClick={() => setSelectedPiece(piece)}
+              className={`w-12 h-12 flex items-center justify-center border rounded ${
+                selectedPiece === piece ? 'bg-blue-500 text-white' : 'bg-gray-800 text-gray-300'
+              }`}
+            >
+              {piece}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={resetBoard}
+          className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold"
+        >
+          Reset Board
+        </button>
+      </div>
     </PageContainer>
   );
 }
