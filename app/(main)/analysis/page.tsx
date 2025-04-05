@@ -56,6 +56,7 @@ export default function AnalysisPage() {
           onPieceDrop={onDrop} // Drag-to-move functionality
           onSquareClick={onSquareClick} // Click-to-move functionality
           boardWidth={650} // Increased the size of the board
+          boardOrientation="white" // Ensure white pieces are at the bottom
         />
       </div>
     </PageContainer>

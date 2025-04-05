@@ -52,29 +52,52 @@ export default function EditorPage() {
   };
 
   // Predefined pieces for adding to the board
-  const pieces = ['wP', 'wR', 'wN', 'wB', 'wQ', 'wK', 'bP', 'bR', 'bN', 'bB', 'bQ', 'bK'];
+  const whitePieces = ['wK', 'wQ', 'wB', 'wN', 'wR', 'wP'];
+  const blackPieces = ['bK', 'bQ', 'bB', 'bN', 'bR', 'bP'];
 
   return (
     <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white mt-10 min-h-screen flex flex-col items-center">
       <div className="flex flex-col items-center">
+      <div className="flex flex-wrap justify-center gap-4 mb-4">
+          {whitePieces.map((piece) => (
+            <button
+              key={piece}
+              onClick={() => setSelectedPiece(piece)}
+              className={`w-12 h-12 flex items-center justify-center border rounded ${
+              selectedPiece === piece ? 'bg-blue-500' : 'bg-gray-800'
+              }`}
+            >
+            <img
+              src={`/images/pieces/${piece}.png`}
+              alt={piece}
+              className="w-8 h-8"
+            />
+            </button>
+          ))}
+        </div>
         <div className="flex justify-center mb-4">
           <Chessboard
             position={position} // Custom board position
             onPieceDrop={onPieceDrop} // Drag-to-move functionality
             onSquareClick={onSquareClick} // Click-to-move functionality
             boardWidth={500} // Adjust the size of the board
+            boardOrientation="white" // Ensure white pieces are at the bottom
           />
         </div>
         <div className="flex flex-wrap justify-center gap-4 mb-4">
-          {pieces.map((piece) => (
+          {blackPieces.map((piece) => (
             <button
               key={piece}
               onClick={() => setSelectedPiece(piece)}
               className={`w-12 h-12 flex items-center justify-center border rounded ${
-                selectedPiece === piece ? 'bg-blue-500 text-white' : 'bg-gray-800 text-gray-300'
+              selectedPiece === piece ? 'bg-blue-500' : 'bg-gray-800'
               }`}
             >
-              {piece}
+            <img
+              src={`/images/pieces/${piece}.png`}
+              alt={piece}
+              className="w-8 h-8"
+            />
             </button>
           ))}
         </div>
