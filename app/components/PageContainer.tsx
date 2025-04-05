@@ -7,7 +7,7 @@ interface PageContainerProps {
 
 export default function PageContainer({ children, className = '' }: PageContainerProps) {
   return (
-    <div className={`pt-16 min-h-screen ${className}`}>
+    <div className={`min-h-screen ${className}`}>
       {children}
     </div>
   );

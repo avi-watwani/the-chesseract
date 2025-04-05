@@ -20,9 +20,9 @@ export default function AnalysisPage() {
 
     if (move) {
       setGame(gameCopy); // Update the game state if the move is valid
-      return true; // Return true for a valid move
+      return true; // Indicate the move was valid
     }
-    return false; // Return false for an invalid move
+    return false; // Indicate the move was invalid
   };
 
   // Handle click-to-move
@@ -49,20 +49,14 @@ export default function AnalysisPage() {
   };
 
   return (
-    <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold mb-6">Analysis Board</h1>
-        <p className="text-xl text-gray-300 mb-8">
-          Analyze your games with our powerful analysis board.
-        </p>
-        <div className="flex justify-center">
-          <Chessboard
-            position={game.fen()} // Set the board position to the current game state
-            onPieceDrop={onDrop} // Drag-to-move functionality
-            onSquareClick={onSquareClick} // Click-to-move functionality
-            boardWidth={500} // Adjust the size of the board
-          />
-        </div>
+    <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white flex justify-center mt-8 pt-4">
+      <div className="flex justify-center">
+        <Chessboard
+          position={game.fen()} // Set the board position to the current game state
+          onPieceDrop={onDrop} // Drag-to-move functionality
+          onSquareClick={onSquareClick} // Click-to-move functionality
+          boardWidth={650} // Increased the size of the board
+        />
       </div>
     </PageContainer>
   );
