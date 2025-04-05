@@ -42,12 +42,17 @@ const coaches: Coach[] = [
   }
 ];
 
-export default async function CoachPage({ params }: { params: { id: string } }) {
-  // Await the params object
-  const { id: coachId } = await params;
+type Props = {
+  params: {
+    id: string;
+  };
+};
 
-  // Find the coach with the matching ID
-  const coach = coaches.find((c) => c.id === coachId);
+export default async function CoachPage({ params }: Props) {
+  const coachId = params.id;
+
+    // Find the coach with the matching ID
+    const coach = coaches.find((c) => c.id === coachId);
   
   // If coach doesn't exist, return 404
   if (!coach) {
