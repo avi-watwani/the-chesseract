@@ -39,50 +39,6 @@ const coaches: Coach[] = [
     longBio: "Grandmaster David Johnson is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters. David's teaching approach focuses on understanding the principles behind moves rather than memorizing variations. His students consistently praise his ability to simplify complex positions and provide actionable advice for players of all levels. David has authored three books on aggressive chess play and dynamic sacrifices.",
     image: "/images/coach-2.jpg",
     achievements: ["Founder of Chess Academy", "Top 100 in World Rankings"]
-  },
-  {
-    id: "sophia-chen",
-    name: "Sophia Chen",
-    rating: 2350,
-    fideRating: 2290,
-    title: "FIDE Master",
-    shortBio: "Specializes in beginner to intermediate skill development",
-    longBio: "Sophia Chen is a FIDE Master who specializes in teaching beginners and intermediate players. Her structured curriculum and patient teaching style make complex concepts accessible to players of all ages. Sophia is passionate about introducing more people to the beautiful game of chess. She has developed a series of progressive lessons that build fundamental skills in a logical sequence, ensuring that students develop a solid foundation. Sophia's approach emphasizes pattern recognition and visualization exercises that strengthen chess intuition.",
-    image: "/images/coach-3.jpg",
-    achievements: ["Youth Chess Ambassador", "Best Chess Educator Award"]
-  },
-  {
-    id: "michael-rodriguez",
-    name: "Michael Rodriguez",
-    rating: 2550,
-    fideRating: 2510,
-    title: "International Master",
-    shortBio: "Tactical genius with expertise in complex middlegame positions",
-    longBio: "International Master Michael Rodriguez is known for his tactical prowess and deep understanding of complex middlegame positions. He has authored several chess books and created popular chess courses. Michael's energetic teaching style keeps students engaged while presenting sophisticated concepts. He specializes in teaching calculation techniques and visualization skills that help players find tactical opportunities consistently. Michael's training program includes intensive tactical exercises designed to sharpen pattern recognition and improve decision-making under pressure.",
-    image: "/images/coach-4.jpg",
-    achievements: ["Author of 5 Chess Books", "Online Chess Content Creator"]
-  },
-  {
-    id: "elena-petrova",
-    name: "Elena Petrova",
-    rating: 2750,
-    fideRating: 2690,
-    title: "Grandmaster",
-    shortBio: "Former World Championship Candidate with strategic mastery",
-    longBio: "Grandmaster Elena Petrova is a former World Championship Candidate known for her strategic mastery and endgame technique. She has coached national teams and elite players. Elena's analytical approach helps students develop a deep understanding of chess principles and improve their decision-making process. Her specialty is transforming small advantages into decisive wins through precise technique. Elena's teaching methodology emphasizes positional understanding and creating comprehensive game plans that extend from the opening through the endgame.",
-    image: "/images/coach-5.jpg",
-    achievements: ["World Championship Candidate", "Coach of Olympic Gold Team"]
-  },
-  {
-    id: "james-wilson",
-    name: "James Wilson",
-    rating: 2400,
-    fideRating: 2360,
-    title: "International Master",
-    shortBio: "Chess psychologist focused on mental training and competition preparation",
-    longBio: "International Master James Wilson combines his chess expertise with a background in sports psychology. He specializes in mental training, competition preparation, and overcoming psychological barriers in chess. James has helped numerous players overcome performance anxiety and reach their full potential. His holistic approach addresses both technical chess skills and the psychological aspects that influence performance. James works with players to develop pre-game routines, time management strategies, and mental resilience techniques that lead to consistent results in tournament play.",
-    image: "/images/coach-6.jpg",
-    achievements: ["Chess Psychology Pioneer", "Mental Training Specialist"]
   }
 ];
 
@@ -213,34 +169,6 @@ function getCoachSpecialties(coachId: string): string[] {
       "Tactical Patterns", 
       "Dynamic Sacrifices",
       "Pawn Structure Analysis"
-    ],
-    "sophia-chen": [
-      "Beginner Fundamentals", 
-      "Basic Tactics", 
-      "Endgame Essentials", 
-      "Chess Notation",
-      "Learning Methodology"
-    ],
-    "michael-rodriguez": [
-      "Tactical Combinations", 
-      "Calculation Training", 
-      "Complex Middlegames", 
-      "Attack and Defense",
-      "Pattern Recognition"
-    ],
-    "elena-petrova": [
-      "Strategic Play", 
-      "Endgame Mastery", 
-      "Positional Sacrifices", 
-      "Long-term Planning",
-      "Converting Advantages"
-    ],
-    "james-wilson": [
-      "Mental Training", 
-      "Competition Psychology", 
-      "Time Management", 
-      "Decision Making",
-      "Focus and Concentration"
     ]
   };
   
@@ -259,26 +187,6 @@ function getCoachCourses(coachId: string): Array<{title: string, level: string, 
       {title: "Aggressive Chess Tactics", level: "Intermediate", price: 179},
       {title: "Dynamic Opening Play", level: "Advanced", price: 229},
       {title: "Practical Attacking Skills", level: "All Levels", price: 149}
-    ],
-    "sophia-chen": [
-      {title: "Chess Fundamentals", level: "Beginner", price: 99},
-      {title: "Basic Tactical Patterns", level: "Beginner", price: 109},
-      {title: "From Beginner to Intermediate", level: "Beginner", price: 129}
-    ],
-    "michael-rodriguez": [
-      {title: "Tactical Vision Training", level: "Intermediate", price: 169},
-      {title: "Calculation Masterclass", level: "Advanced", price: 219},
-      {title: "Winning Tactical Patterns", level: "All Levels", price: 149}
-    ],
-    "elena-petrova": [
-      {title: "Strategic Mastery", level: "Advanced", price: 199},
-      {title: "Dominating the Endgame", level: "Advanced", price: 219},
-      {title: "Positional Decision Making", level: "Intermediate", price: 179}
-    ],
-    "james-wilson": [
-      {title: "Chess Psychology", level: "All Levels", price: 149},
-      {title: "Tournament Success", level: "Intermediate", price: 179},
-      {title: "Mental Toughness Training", level: "Advanced", price: 199}
     ]
   };
   
