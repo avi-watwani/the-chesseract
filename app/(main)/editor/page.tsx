@@ -59,7 +59,7 @@ export default function EditorPage() {
     <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white mt-10 min-h-screen flex flex-col items-center">
       <div className="flex flex-col items-center">
       <div className="flex flex-wrap justify-center gap-4 mb-4">
-          {whitePieces.map((piece) => (
+          {blackPieces.map((piece) => (
             <button
               key={piece}
               onClick={() => setSelectedPiece(piece)}
@@ -85,7 +85,7 @@ export default function EditorPage() {
           />
         </div>
         <div className="flex flex-wrap justify-center gap-4 mb-4">
-          {blackPieces.map((piece) => (
+          {whitePieces.map((piece) => (
             <button
               key={piece}
               onClick={() => setSelectedPiece(piece)}
