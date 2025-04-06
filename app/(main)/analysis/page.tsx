@@ -28,7 +28,7 @@ export default function AnalysisPage() {
   // Handle piece drop (drag-to-move)
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     const gameCopy = new Chess();
-    gameCopy.loadPgn(game.pgn());
+    gameCopy.loadPgn(history[currentMoveIndex] || game.pgn()); // Load the current move state
     const move = gameCopy.move({
       from: sourceSquare,
       to: targetSquare,
@@ -38,7 +38,7 @@ export default function AnalysisPage() {
     if (move) {
       setGame(gameCopy); // Update the game state if the move is valid
       setLastMove({ from: sourceSquare, to: targetSquare }); // Update the last move
-      setHistory((prev) => [...prev.slice(0, currentMoveIndex), gameCopy.pgn()]); // Update history
+      setHistory((prev) => [...prev.slice(0, currentMoveIndex + 1), gameCopy.pgn()]); // Update history correctly
       setCurrentMoveIndex((prev) => prev + 1); // Update current move index
       return true; // Indicate the move was valid
     }
@@ -48,9 +48,10 @@ export default function AnalysisPage() {
   // Handle click-to-move
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const onSquareClick = (square: string) => {
+    const gameCopy = new Chess();
+    gameCopy.loadPgn(history[currentMoveIndex] || game.pgn()); // Load the current move state
+
     if (selectedSquare) {
-      const gameCopy = new Chess();
-      gameCopy.loadPgn(game.pgn());
       const move = gameCopy.move({
         from: selectedSquare,
         to: square,
@@ -59,6 +60,9 @@ export default function AnalysisPage() {
 
       if (move) {
         setGame(gameCopy); // Update the game state if the move is valid
+        setLastMove({ from: selectedSquare, to: square }); // Update the last move
+        setHistory((prev) => [...prev.slice(0, currentMoveIndex + 1), gameCopy.pgn()]); // Update history
+        setCurrentMoveIndex((prev) => prev + 1); // Update current move index
         setSelectedSquare(null); // Reset the selected square
       } else {
         setSelectedSquare(square); // Select a new square
@@ -72,10 +76,17 @@ export default function AnalysisPage() {
   const goBackward = () => {
     if (currentMoveIndex > 0) {
       const gameCopy = new Chess();
-      gameCopy.loadPgn(history[currentMoveIndex - 1]);
+      gameCopy.loadPgn(history[currentMoveIndex - 1]); // Load the previous move state
       setGame(gameCopy);
-      setCurrentMoveIndex((prev) => prev - 1);
-      setLastMove(null); // Clear last move highlight
+      setCurrentMoveIndex((prev) => prev - 1); // Decrement the move index
+
+      // Highlight the last move
+      const previousMove = gameCopy.history({ verbose: true }).slice(-1)[0];
+      if (previousMove) {
+        setLastMove({ from: previousMove.from, to: previousMove.to });
+      } else {
+        setLastMove(null); // Clear last move highlight if no previous move
+      }
     }
   };
 
@@ -83,10 +94,17 @@ export default function AnalysisPage() {
   const goForward = () => {
     if (currentMoveIndex < history.length - 1) {
       const gameCopy = new Chess();
-      gameCopy.loadPgn(history[currentMoveIndex + 1]);
+      gameCopy.loadPgn(history[currentMoveIndex + 1]); // Load the next move state
       setGame(gameCopy);
-      setCurrentMoveIndex((prev) => prev + 1);
-      setLastMove(null); // Clear last move highlight
+      setCurrentMoveIndex((prev) => prev + 1); // Increment the move index
+
+      // Highlight the last move
+      const nextMove = gameCopy.history({ verbose: true }).slice(-1)[0];
+      if (nextMove) {
+        setLastMove({ from: nextMove.from, to: nextMove.to });
+      } else {
+        setLastMove(null); // Clear last move highlight if no next move
+      }
     }
   };
 
@@ -94,6 +112,20 @@ export default function AnalysisPage() {
   const isDraggable = (piece: string) => {
     const turn = game.turn(); // 'w' for white, 'b' for black
     return (turn === 'w' && piece.startsWith('w')) || (turn === 'b' && piece.startsWith('b'));
+  };
+
+  const customSquareStyles = {
+    ...(lastMove
+      ? {
+          [lastMove.from]: { backgroundColor: 'rgba(73, 73, 40, 0.6)' }, // Highlight from square
+          [lastMove.to]: { backgroundColor: 'rgba(68, 68, 26, 0.6)' }, // Highlight to square
+        }
+      : {}),
+    ...(selectedSquare
+      ? {
+          [selectedSquare]: { backgroundColor: 'rgba(0, 123, 255, 0.6)' }, // Highlight selected square
+        }
+      : {}),
   };
 
   return (
@@ -106,14 +138,7 @@ export default function AnalysisPage() {
             onSquareClick={onSquareClick} // Click-to-move functionality
             boardWidth={boardWidth} // Responsive board width
             boardOrientation="white" // Ensure white pieces are at the bottom
-            customSquareStyles={
-              lastMove
-                ? {
-                    [lastMove.from]: { backgroundColor: 'rgba(73, 73, 40, 0.6)' }, // Highlight from square
-                    [lastMove.to]: { backgroundColor: 'rgba(68, 68, 26, 0.6)' }, // Highlight to square
-                  }
-                : {}
-            }
+            customSquareStyles={customSquareStyles} // Highlight last move and selected square
             isDraggablePiece={({ piece }) => isDraggable(piece)} // Disable dragging based on turn
           />
           <div className="flex gap-4 mt-4">
