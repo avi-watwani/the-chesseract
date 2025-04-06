@@ -9,6 +9,7 @@ export default function EditorPage() {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white'); // Board orientation state
+  const [turn, setTurn] = useState<'white' | 'black'>('white'); // State for turn selection
 
   // Handle square click for adding/removing pieces
   const onSquareClick = (square: string) => {
@@ -105,6 +106,30 @@ export default function EditorPage() {
             />
             </button>
           ))}
+        </div>
+        <div className="flex items-center gap-4 mb-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="turn"
+              value="white"
+              checked={turn === 'white'}
+              onChange={() => setTurn('white')}
+              className="form-radio"
+            />
+            White to play
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="turn"
+              value="black"
+              checked={turn === 'black'}
+              onChange={() => setTurn('black')}
+              className="form-radio"
+            />
+            Black to play
+          </label>
         </div>
         <button
           onClick={flipBoard}
