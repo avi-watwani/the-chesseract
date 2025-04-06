@@ -8,6 +8,7 @@ export default function EditorPage() {
   const [position, setPosition] = useState<Record<string, string>>({}); // Custom board position
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
+  const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white'); // Board orientation state
 
   // Handle square click for adding/removing pieces
   const onSquareClick = (square: string) => {
@@ -51,6 +52,10 @@ export default function EditorPage() {
     setPosition({});
   };
 
+  const flipBoard = () => {
+    setBoardOrientation((prev) => (prev === 'white' ? 'black' : 'white'));
+  };
+
   // Predefined pieces for adding to the board
   const whitePieces = ['wK', 'wQ', 'wB', 'wN', 'wR', 'wP'];
   const blackPieces = ['bK', 'bQ', 'bB', 'bN', 'bR', 'bP'];
@@ -81,7 +86,7 @@ export default function EditorPage() {
             onPieceDrop={onPieceDrop} // Drag-to-move functionality
             onSquareClick={onSquareClick} // Click-to-move functionality
             boardWidth={500} // Adjust the size of the board
-            boardOrientation="white" // Ensure white pieces are at the bottom
+            boardOrientation={boardOrientation} // Dynamic board orientation
           />
         </div>
         <div className="flex flex-wrap justify-center gap-4 mb-4">
@@ -101,6 +106,12 @@ export default function EditorPage() {
             </button>
           ))}
         </div>
+        <button
+          onClick={flipBoard}
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-bold"
+        >
+          Flip Board
+        </button>
         <button
           onClick={resetBoard}
           className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold"
