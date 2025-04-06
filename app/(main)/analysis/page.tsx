@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Chess } from 'chess.js'; // Chess.js for game logic
 import { Chessboard } from 'react-chessboard';
 import PageContainer from '../../components/PageContainer';
 
 export default function AnalysisPage() {
   const [game, setGame] = useState(new Chess());
+  const [boardWidth, setBoardWidth] = useState(650); // State for responsive board width
+
+  useEffect(() => {
+    const updateBoardWidth = () => {
+      setBoardWidth(Math.min(650, window.innerWidth - 40)); // Adjust board width based on screen size
+    };
+
+    updateBoardWidth(); // Set initial board width
+    window.addEventListener('resize', updateBoardWidth); // Update on window resize
+
+    return () => {
+      window.removeEventListener('resize', updateBoardWidth); // Cleanup listener
+    };
+  }, []);
 
   // Handle piece drop (drag-to-move)
   const onDrop = (sourceSquare: string, targetSquare: string) => {
@@ -55,7 +69,7 @@ export default function AnalysisPage() {
           position={game.fen()} // Set the board position to the current game state
           onPieceDrop={onDrop} // Drag-to-move functionality
           onSquareClick={onSquareClick} // Click-to-move functionality
-          boardWidth={650} // Increased the size of the board
+          boardWidth={boardWidth} // Responsive board width
           boardOrientation="white" // Ensure white pieces are at the bottom
         />
       </div>
