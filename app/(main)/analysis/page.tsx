@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Chess } from 'chess.js'; // Chess.js for game logic
+import { Chess, Square } from 'chess.js'; // Chess.js for game logic
 import { Chessboard } from 'react-chessboard';
 import PageContainer from '../../components/PageContainer';
 
@@ -51,6 +51,8 @@ export default function AnalysisPage() {
     const gameCopy = new Chess();
     gameCopy.loadPgn(history[currentMoveIndex] || game.pgn()); // Load the current move state
 
+    const piece = gameCopy.get(square as Square); // Check if the square has a piece
+
     if (selectedSquare) {
       const move = gameCopy.move({
         from: selectedSquare,
@@ -65,10 +67,10 @@ export default function AnalysisPage() {
         setCurrentMoveIndex((prev) => prev + 1); // Update current move index
         setSelectedSquare(null); // Reset the selected square
       } else {
-        setSelectedSquare(square); // Select a new square
+        setSelectedSquare(null); // Reset the selected square if the move is invalid
       }
     } else {
-      setSelectedSquare(square); // Select the clicked square
+      setSelectedSquare(piece ? square : null); // Select the clicked square only if it has a piece
     }
   };
 
