@@ -55,15 +55,69 @@ const About = () => {
           </div>
 
           <div className="lg:w-1/2">
-            <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-6">Our Mission</h3>
-            <p className="text-gray-300 mb-8">
-              We're dedicated to transforming chess education by creating a learning environment 
-              that challenges conventional thinking and expands your chess understanding beyond 
-              the 64 squares. Like a tesseract expanding a cube into the fourth dimension, 
-              we extend your chess comprehension into new realms of strategic thinking.
-            </p>
-            
-            <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-6">What Sets Us Apart</h3>
+            <div className="bg-gradient-to-b from-secondary-black to-secondary-black/80 py-12 px-6 rounded-lg shadow-lg">
+              <h3 className="text-2xl font-montserrat font-bold text-primary-blue mb-4">Why Choose Us?</h3>
+              <p className="text-lg text-gray-300 leading-relaxed mb-6">
+                At The Chesseract, we combine tradition with innovation to create a unique learning experience. 
+                Our programs are designed to challenge and inspire players of all levels.
+              </p>
+              <ul className="list-disc list-inside text-gray-300">
+                <li>Personalized coaching tailored to your needs</li>
+                <li>Access to exclusive resources and tools</li>
+                <li>Community-driven learning environment</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Our Mission Section */}
+        <div className="mt-16 bg-gradient-to-b from-secondary-black to-secondary-black/80 py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="glassmorphism rounded-lg p-10 shadow-lg">
+                <h2 className="text-3xl md:text-4xl font-montserrat font-bold text-primary-blue mb-6">Our Mission</h2>
+                <p className="text-lg text-gray-300 leading-relaxed mb-8">
+                  At The Chesseract, we believe that every player has the potential to master the game of chess. 
+                  Our mission is to make high-quality chess education accessible to everyone, from beginners to advanced players.
+                </p>
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-blue-600/20 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Innovation</h3>
+                    <p className="text-gray-400">Cutting-edge learning tools and methods</p>
+                  </div>
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-purple-600/20 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Excellence</h3>
+                    <p className="text-gray-400">World-class instruction and curriculum</p>
+                  </div>
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-indigo-600/20 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Community</h3>
+                    <p className="text-gray-400">Supportive learning environment</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* What Sets Us Apart Section */}
+        <div className="py-12 bg-gradient-to-b from-secondary-black to-secondary-black/90 text-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-6 text-center">What Sets Us Apart</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {features.map((feature, index) => (
                 <div key={index} className="glassmorphism p-6 rounded-lg hover-scale">
@@ -80,4 +134,4 @@ const About = () => {
   )
 }
 
-export default About 
+export default About
