@@ -33,6 +33,10 @@ const Navbar = () => {
     setIsLearnOpen(!isLearnOpen);
   };
 
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
+
   return (
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -124,6 +128,7 @@ const Navbar = () => {
           <Link 
             href="/play"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+            onClick={closeMenu}
           >
             Play
           </Link>
@@ -139,18 +144,21 @@ const Navbar = () => {
               <Link 
                 href="/coaches"
                 className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+                onClick={closeMenu}
               >
                 Find your Coach
               </Link>
               <Link 
                 href="/analysis"
                 className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+                onClick={closeMenu}
               >
                 Analysis Board
               </Link>
               <Link 
                 href="/editor"
                 className="block px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-md"
+                onClick={closeMenu}
               >
                 Board Editor
               </Link>
@@ -159,24 +167,28 @@ const Navbar = () => {
           <Link 
             href="/shop"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+            onClick={closeMenu}
           >
             Shop
           </Link>
           <Link 
             href="/blog"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+            onClick={closeMenu}
           >
             Blog
           </Link>
           <Link 
             href="/about"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+            onClick={closeMenu}
           >
             About
           </Link>
           <Link 
             href="/contact"
             className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+            onClick={closeMenu}
           >
             Contact
           </Link>
@@ -184,12 +196,14 @@ const Navbar = () => {
             <Link 
               href="/login"
               className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+              onClick={closeMenu}
             >
               Log In
             </Link>
             <Link 
               href="/signup"
               className="block px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md mt-2"
+              onClick={closeMenu}
             >
               Sign Up
             </Link>
