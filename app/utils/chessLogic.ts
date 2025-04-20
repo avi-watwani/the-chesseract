@@ -152,4 +152,39 @@ export function isStalemate(board: Square[][], color: 'white' | 'black'): boolea
   }
 
   return true;
-} 
+}
+
+export function generateFEN(board: Square[][], activeColor: 'w' | 'b', castling: string, enPassant: string, halfmoveClock: number, fullmoveNumber: number): string {
+  let fen = '';
+  for (let row = 0; row < 8; row++) {
+    let emptyCount = 0;
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col].piece;
+      if (piece) {
+        if (emptyCount > 0) {
+          fen += emptyCount;
+          emptyCount = 0;
+        }
+        fen += piece.color === 'white' ? piece.type.toUpperCase() : piece.type.toLowerCase();
+      } else {
+        emptyCount++;
+      }
+    }
+    if (emptyCount > 0) fen += emptyCount;
+    if (row < 7) fen += '/';
+  }
+  return `${fen} ${activeColor} ${castling} ${enPassant} ${halfmoveClock} ${fullmoveNumber}`;
+}
+
+export function generatePGN(moveHistory: string[], metadata: { [key: string]: string }): string {
+  let pgn = '';
+  for (const [key, value] of Object.entries(metadata)) {
+    pgn += `[${key} "${value}"]\n`;
+  }
+  pgn += '\n';
+  moveHistory.forEach((move, index) => {
+    if (index % 2 === 0) pgn += `${Math.floor(index / 2) + 1}. `;
+    pgn += `${move} `;
+  });
+  return pgn.trim();
+}
