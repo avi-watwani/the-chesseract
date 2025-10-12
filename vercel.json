@@ -17,8 +17,5 @@
         "Access-Control-Allow-Credentials": "true"
       }
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_SOCKET_URL": "https://the-chesseract-e7psq7z0x-avi-watwanis-projects.vercel.app"
-  }
+  ]
 }
