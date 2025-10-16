@@ -8,6 +8,7 @@ type Coach = {
   rating: number;
   fideRating?: number;
   title: string;
+  title_short: string;
   shortBio: string;
   longBio: string;
   image: string;
@@ -17,26 +18,28 @@ type Coach = {
 // Mock data for coaches
 const coaches: Coach[] = [
   {
-    id: "anna-smith",
-    name: "Anna Smith",
-    rating: 2450,
-    fideRating: 2380,
+    id: "avi-watwani",
+    name: "Avi Watwani",
+    rating: 2101,
+    fideRating: 2014,
     title: "International Master",
-    shortBio: "Former national champion with 15+ years of teaching experience",
-    longBio: "Anna Smith is an International Master who has represented her country in multiple Chess Olympiads. With over 15 years of teaching experience, she specializes in positional play and endgame techniques. Her students have gone on to win numerous national and international youth championships.",
+    title_short: "IM",
+    shortBio: "Winner of multiple online tournaments",
+    longBio: "Avi Watwani is a professional chess player and coach with over 12 years of experience in the game. Holding a 2000+ rating on major online chess platforms, he ranks among the top 10% of players worldwide. Over the years, Avi has participated in and won multiple online tournaments, developing a deep understanding of the strategic and psychological aspects of chess. For the past four years, he has been mentoring young players aged 5 to 15 years, helping them strengthen their foundations in openings, tactics, endgames, and overall chess understanding. Passionate about teaching, Avi focuses on making chess both fun and intellectually stimulating for his students — guiding them from beginner concepts to advanced competitive preparation. He firmly believes that “in chess, with every game played — win or lose — you are one move closer to greatness.",
     image: "/images/coach-1.jpg",
-    achievements: ["Top 50 in Women's Rankings", "Coach of 2 National Teams"]
+    achievements: ["Founder of Chess Academy", "Top 10% in the world"]
   },
   {
-    id: "david-johnson",
-    name: "David Johnson",
-    rating: 2650,
+    id: "placeholder-1",
+    name: "John Doe",
+    rating: 2750,
     fideRating: 2610,
     title: "Grandmaster",
+    title_short: "GM",
     shortBio: "Renowned opening expert and attacking specialist",
-    longBio: "Grandmaster David Johnson is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters. David's teaching approach focuses on understanding the principles behind moves rather than memorizing variations.",
+    longBio: "Grandmaster John Doe is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters. John's teaching approach focuses on understanding the principles behind moves rather than memorizing variations.",
     image: "/images/coach-2.jpg",
-    achievements: ["Founder of Chess Academy", "Top 100 in World Rankings"]
+    achievements: ["Duke University Chess Team Captain", "Finalist in the World Open Chess Championship"]
   }
 ];
 
@@ -71,9 +74,9 @@ export default function CoachesPage() {
                 </div>
 
                 <h3 className="text-xl font-bold mb-1 text-center">
-                  {coach.title === "Grandmaster" ? "GM" : coach.title === "International Master" ? "IM" : "FM"} {coach.name}
+                  {coach.title_short}{coach.id.startsWith('avi-') && <sup>*</sup>} {coach.name}
                 </h3>
-                <div className="text-gray-300 mb-4 text-center">{coach.title}</div>
+                <div className="text-gray-300 mb-4 text-center">{coach.title}{coach.id.startsWith('avi-') && <sup>*</sup>}</div>
                 
                 <div className="flex flex-col gap-2 w-full">
                   <div className="bg-white text-black text-sm font-bold px-3 py-1 rounded-full text-center">
