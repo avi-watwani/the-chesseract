@@ -45,7 +45,7 @@ const coaches: Coach[] = [
 
 export default function CoachesPage() {
   return (
-    <PageContainer className="pb-16 bg-gradient-to-b from-gray-900 to-black text-white">
+    <PageContainer className="pb-16 bg-gradient-to-b from-gray-900 to-black text-white mt-8">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold text-center mb-4">Our Chess Coaches</h1>
         <p className="text-gray-300 text-center max-w-3xl mx-auto mb-12">

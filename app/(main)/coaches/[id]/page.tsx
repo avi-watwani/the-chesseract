@@ -63,7 +63,7 @@ export default async function CoachPage({ params }: Props) {
   }
   
   return (
-    <PageContainer className="pb-16 bg-gradient-to-b from-gray-900 to-black text-white">
+    <PageContainer className="pb-16 bg-gradient-to-b from-gray-900 to-black text-white mt-8">
       <div className="container mx-auto px-4">
         <Link href="/coaches" className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-8">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
