@@ -7,7 +7,7 @@ import { isValidMove, isKingInCheck, isCheckmate, isStalemate } from '../utils/c
 import { soundManager } from '../utils/sounds';
 import ChessControls from './ChessControls';
 import { Piece, Square } from '../types/chess';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Flag, Scale, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
 interface ChessBoardProps {
   socket?: Socket;
@@ -260,79 +260,184 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     board.slice().reverse().map(row => row.slice().reverse()) : 
     board;
 
-  return (
-    <div className="flex flex-col items-center">      
-      <div className="relative">
-        {/* Game status overlay */}
-        {!isAnalysisMode && gameStatus !== 'playing' && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-            <div className="text-2xl font-bold text-white">
-              {gameStatus === 'checkmate' && `${turn === 'white' ? 'Black' : 'White'} wins by checkmate!`}
-              {gameStatus === 'stalemate' && 'Game drawn by stalemate!'}
-              {gameStatus === 'check' && 'Check!'}
-            </div>
-          </div>
-        )}
+  // Helper function to get piece point values
+  const getPiecePoints = (piece: Piece): number => {
+    switch (piece.type) {
+      case 'pawn': return 1;
+      case 'knight': return 3;
+      case 'bishop': return 3;
+      case 'rook': return 5;
+      case 'queen': return 9;
+      case 'king': return 0;
+      default: return 0;
+    }
+  };
 
-        {/* Chess board */}
-        <div className="grid grid-cols-8 gap-0 border-2 border-gray-700">
-          {boardToRender.map((row, rowIndex) => (
-            <React.Fragment key={rowIndex}>
-              {row.map((square, colIndex) => {
-                const isLightSquare = (rowIndex + colIndex) % 2 === 0;
-                const isSelected = selectedSquare === square.position;
-                const isValidMove = validMoves.includes(square.position);
-                const canMove = selectedSquare && isPlayable && isPlayerTurn;
-                
-                return (
-                  <div
-                    key={square.position}
-                    className={`
-                      w-16 h-16 flex items-center justify-center relative
-                      ${isLightSquare ? 'bg-gray-200' : 'bg-gray-600'}
-                      ${isSelected ? 'ring-2 ring-yellow-400' : ''}
-                      ${isValidMove ? 'cursor-pointer' : ''}
-                      hover:opacity-90 transition-opacity
-                    `}
-                    onClick={() => handleSquareClick(square.position)}
-                  >
-                    {square.piece && (
-                      <div className="w-12 h-12">
-                        {renderPiece(square.piece)}
-                      </div>
-                    )}
-                    {isValidMove && !square.piece && (
-                      <div className="absolute w-3 h-3 bg-yellow-400 rounded-full opacity-50" />
-                    )}
-                  </div>
-                );
-              })}
-            </React.Fragment>
+  // Helper function to render captured pieces
+  const renderCapturedPieces = (pieces: Piece[], color: 'white' | 'black') => {
+    const totalPoints = pieces.reduce((sum, piece) => sum + getPiecePoints(piece), 0);
+    
+    return (
+      <div className={`flex items-center gap-2 ${color === 'white' ? 'justify-end' : 'justify-start'}`}>
+        <div className="flex gap-1">
+          {pieces.map((piece, index) => (
+            <div key={index} className="w-6 h-6 flex items-center justify-center">
+              {renderPiece(piece)}
+            </div>
           ))}
+        </div>
+        {totalPoints > 0 && (
+          <span className="text-sm font-semibold text-gray-600">+{totalPoints}</span>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full flex justify-center items-start">
+      {/* Chess board with captured pieces - centered */}
+      <div className="flex flex-col items-center">
+        {/* Black captured pieces (above board) */}
+        <div className="mb-2 w-full max-w-[512px] px-2">
+          {renderCapturedPieces(capturedPieces.black, 'black')}
+        </div>
+
+        <div className="relative">
+          {/* Game status overlay */}
+          {!isAnalysisMode && gameStatus !== 'playing' && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <div className="text-2xl font-bold text-white">
+                {gameStatus === 'checkmate' && `${turn === 'white' ? 'Black' : 'White'} wins by checkmate!`}
+                {gameStatus === 'stalemate' && 'Game drawn by stalemate!'}
+                {gameStatus === 'check' && 'Check!'}
+              </div>
+            </div>
+          )}
+
+          {/* Chess board */}
+          <div className="grid grid-cols-8 gap-0 border-2 border-gray-700">
+            {boardToRender.map((row, rowIndex) => (
+              <React.Fragment key={rowIndex}>
+                {row.map((square, colIndex) => {
+                  const isLightSquare = (rowIndex + colIndex) % 2 === 0;
+                  const isSelected = selectedSquare === square.position;
+                  const isValidMove = validMoves.includes(square.position);
+                  const canMove = selectedSquare && isPlayable && isPlayerTurn;
+                  
+                  return (
+                    <div
+                      key={square.position}
+                      className={`
+                        w-16 h-16 flex items-center justify-center relative
+                        ${isLightSquare ? 'bg-gray-200' : 'bg-gray-600'}
+                        ${isSelected ? 'ring-2 ring-yellow-400' : ''}
+                        ${isValidMove ? 'cursor-pointer' : ''}
+                        hover:opacity-90 transition-opacity
+                      `}
+                      onClick={() => handleSquareClick(square.position)}
+                    >
+                      {square.piece && (
+                        <div className="w-12 h-12">
+                          {renderPiece(square.piece)}
+                        </div>
+                      )}
+                      {isValidMove && !square.piece && (
+                        <div className="absolute w-3 h-3 bg-yellow-400 rounded-full opacity-50" />
+                      )}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* White captured pieces (below board) */}
+        <div className="mt-2 w-full max-w-[512px] px-2">
+          {renderCapturedPieces(capturedPieces.white, 'white')}
         </div>
       </div>
 
-      {/* Controls */}
-      <ChessControls
-        moveHistory={moveHistory}
-        capturedPieces={capturedPieces}
-        onResign={() => {
-          setGameStatus('resigned');
-          soundManager?.playGameEnd();
-          if (socket && gameId) {
-            socket.emit('resign', { gameId });
-          }
-        }}
-        onDrawOffer={() => {
-          if (socket && gameId) {
-            socket.emit('drawOffer', { gameId });
-          }
-        }}
-        isSoundEnabled={isSoundEnabled}
-        onToggleSound={() => setIsSoundEnabled(!isSoundEnabled)}
-        isAnalysisMode={isAnalysisMode}
-        onReset={isAnalysisMode ? handleReset : undefined}
-      />
+      {/* Move history and controls - positioned to the right */}
+      <div className="flex flex-col gap-4 min-w-[300px] ml-6">
+        {/* Move History */}
+        <div className="bg-gray-900 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-gray-200 mb-3">Move History</h3>
+          <div className="h-96 overflow-y-auto">
+            <div className="space-y-1">
+              {Array.from({ length: Math.ceil(moveHistory.length / 2) }, (_, index) => {
+                const whiteMove = moveHistory[index * 2];
+                const blackMove = moveHistory[index * 2 + 1];
+                const moveNumber = index + 1;
+                
+                return (
+                  <div key={index} className="flex items-center text-gray-300 py-1 hover:bg-gray-800 rounded px-2">
+                    <span className="w-8 text-gray-500 font-semibold">{moveNumber}.</span>
+                    <div className="flex-1 flex gap-4">
+                      <span className="flex-1">{whiteMove || ''}</span>
+                      <span className="flex-1">{blackMove || ''}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="bg-gray-900 rounded-lg p-4">
+          {!isAnalysisMode && (
+            <div className="flex justify-between mb-4">
+              <button
+                onClick={() => {
+                  setGameStatus('resigned');
+                  soundManager?.playGameEnd();
+                  if (socket && gameId) {
+                    socket.emit('resign', { gameId });
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-md hover:bg-red-500/30 transition-colors"
+              >
+                <Flag className="w-4 h-4" />
+                Resign
+              </button>
+              <button
+                onClick={() => {
+                  if (socket && gameId) {
+                    socket.emit('drawOffer', { gameId });
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-500 rounded-md hover:bg-blue-500/30 transition-colors"
+              >
+                <Scale className="w-4 h-4" />
+                Offer Draw
+              </button>
+            </div>
+          )}
+          {isAnalysisMode && (
+            <div className="flex justify-between mb-4">
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-500 rounded-md hover:bg-green-500/30 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset Board
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700/20 text-gray-300 rounded-md hover:bg-gray-700/30 transition-colors w-full justify-center"
+          >
+            {isSoundEnabled ? (
+              <Volume2 className="w-4 h-4" />
+            ) : (
+              <VolumeX className="w-4 h-4" />
+            )}
+            {isSoundEnabled ? 'Sound On' : 'Sound Off'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
