@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flag, Scale, Volume2, VolumeX } from 'lucide-react';
+import { Flag, Scale, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { Piece } from '../types/chess';
 
 interface ChessControlsProps {
@@ -12,6 +12,8 @@ interface ChessControlsProps {
   onDrawOffer: () => void;
   isSoundEnabled: boolean;
   onToggleSound: () => void;
+  isAnalysisMode?: boolean;
+  onReset?: () => void;
 }
 
 const ChessControls: React.FC<ChessControlsProps> = ({
@@ -20,7 +22,9 @@ const ChessControls: React.FC<ChessControlsProps> = ({
   onResign,
   onDrawOffer,
   isSoundEnabled,
-  onToggleSound
+  onToggleSound,
+  isAnalysisMode = false,
+  onReset
 }) => {
   return (
     <div className="w-full max-w-xl mx-auto mt-4 grid grid-cols-2 gap-4">
@@ -66,20 +70,33 @@ const ChessControls: React.FC<ChessControlsProps> = ({
         </div>
 
         <div className="bg-gray-900 rounded-lg p-4 flex justify-between">
-          <button
-            onClick={onResign}
-            className="flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-md hover:bg-red-500/30 transition-colors"
-          >
-            <Flag className="w-4 h-4" />
-            Resign
-          </button>
-          <button
-            onClick={onDrawOffer}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-500 rounded-md hover:bg-blue-500/30 transition-colors"
-          >
-            <Scale className="w-4 h-4" />
-            Offer Draw
-          </button>
+          {!isAnalysisMode && (
+            <>
+              <button
+                onClick={onResign}
+                className="flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-md hover:bg-red-500/30 transition-colors"
+              >
+                <Flag className="w-4 h-4" />
+                Resign
+              </button>
+              <button
+                onClick={onDrawOffer}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-500 rounded-md hover:bg-blue-500/30 transition-colors"
+              >
+                <Scale className="w-4 h-4" />
+                Offer Draw
+              </button>
+            </>
+          )}
+          {isAnalysisMode && onReset && (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-500 rounded-md hover:bg-green-500/30 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset Board
+            </button>
+          )}
           <button
             onClick={onToggleSound}
             className="flex items-center gap-2 px-3 py-2 bg-gray-700/20 text-gray-300 rounded-md hover:bg-gray-700/30 transition-colors"

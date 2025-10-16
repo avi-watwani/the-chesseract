@@ -14,6 +14,7 @@ interface ChessBoardProps {
   gameId?: string;
   playerColor?: 'white' | 'black';
   isPlayable?: boolean;
+  isAnalysisMode?: boolean;
 }
 
 const initialBoard: Square[][] = Array(8).fill(null).map((_, rowIndex) => {
@@ -54,7 +55,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   socket, 
   gameId, 
   playerColor = 'white',
-  isPlayable = true 
+  isPlayable = true,
+  isAnalysisMode = false
 }) => {
   const [board, setBoard] = useState<Square[][]>(initialBoard);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
@@ -83,19 +85,21 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [socket, gameId]);
 
   useEffect(() => {
-    // Check game status after each move
-    const currentColor = isPlayerTurn ? playerColor : (playerColor === 'white' ? 'black' : 'white');
-    
-    if (isCheckmate(board, currentColor)) {
-      setGameStatus('checkmate');
-    } else if (isKingInCheck(board, currentColor)) {
-      setGameStatus('check');
-    } else if (isStalemate(board, currentColor)) {
-      setGameStatus('stalemate');
-    } else {
-      setGameStatus('playing');
+    // Check game status after each move (only in non-analysis mode)
+    if (!isAnalysisMode) {
+      const currentColor = isPlayerTurn ? playerColor : (playerColor === 'white' ? 'black' : 'white');
+      
+      if (isCheckmate(board, currentColor)) {
+        setGameStatus('checkmate');
+      } else if (isKingInCheck(board, currentColor)) {
+        setGameStatus('check');
+      } else if (isStalemate(board, currentColor)) {
+        setGameStatus('stalemate');
+      } else {
+        setGameStatus('playing');
+      }
     }
-  }, [board, isPlayerTurn]);
+  }, [board, isPlayerTurn, isAnalysisMode]);
 
   useEffect(() => {
     if (soundManager) {
@@ -125,7 +129,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   const handleSquareClick = (position: string) => {
-    if (!isPlayable || gameStatus === 'checkmate' || gameStatus === 'stalemate') return;
+    if (!isPlayable || (!isAnalysisMode && (gameStatus === 'checkmate' || gameStatus === 'stalemate'))) return;
     
     if (selectedSquare === position) {
       setSelectedSquare(null);
@@ -141,7 +145,11 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       const col = file.charCodeAt(0) - 97;
       const row = 8 - parseInt(rank);
       
-      if (board[row][col].piece?.color === playerColor && isPlayerTurn) {
+      // In analysis mode, allow selecting any piece
+      if (isAnalysisMode && board[row][col].piece) {
+        setSelectedSquare(position);
+        setValidMoves(calculateValidMoves(position));
+      } else if (!isAnalysisMode && board[row][col].piece?.color === playerColor && isPlayerTurn) {
         setSelectedSquare(position);
         setValidMoves(calculateValidMoves(position));
       }
@@ -161,8 +169,18 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     const movingPiece = newBoard[fromRow][fromCol].piece;
 
     if (!movingPiece) return;
-    if (!isOpponentMove && movingPiece.color !== playerColor) return;
-    if (!isOpponentMove && !isPlayerTurn) return;
+    
+    // In analysis mode, allow any move without restrictions
+    if (!isAnalysisMode) {
+      if (!isOpponentMove && movingPiece.color !== playerColor) return;
+      if (!isOpponentMove && !isPlayerTurn) return;
+    }
+
+    // Check for captured piece BEFORE making the move
+    const capturedPiece = newBoard[toRow][toCol].piece;
+    if (capturedPiece && (isOpponentMove || isAnalysisMode)) {
+      handleCapture(capturedPiece);
+    }
 
     newBoard[toRow][toCol].piece = movingPiece;
     newBoard[fromRow][fromCol].piece = null;
@@ -171,7 +189,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     setSelectedSquare(null);
     setValidMoves([]);
 
-    if (!isOpponentMove) {
+    // Only emit socket events and update turn in non-analysis mode
+    if (!isAnalysisMode && !isOpponentMove) {
       setIsPlayerTurn(false);
       socket?.emit('makeMove', {
         gameId,
@@ -180,16 +199,23 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       });
     }
 
-    // Check game status
-    const nextColor = isPlayerTurn ? 'black' : 'white';
-    if (isCheckmate(newBoard, nextColor)) {
-      setGameStatus('checkmate');
-      soundManager?.playGameEnd();
-    } else if (isStalemate(newBoard, nextColor)) {
-      setGameStatus('stalemate');
-      soundManager?.playGameEnd();
-    } else if (isKingInCheck(newBoard, nextColor)) {
-      soundManager?.playCheck();
+    // Update turn for analysis mode
+    if (isAnalysisMode) {
+      setTurn(prevTurn => prevTurn === 'white' ? 'black' : 'white');
+    }
+
+    // Check game status (only in non-analysis mode or if we want to show check/checkmate in analysis)
+    if (!isAnalysisMode) {
+      const nextColor = isPlayerTurn ? 'black' : 'white';
+      if (isCheckmate(newBoard, nextColor)) {
+        setGameStatus('checkmate');
+        soundManager?.playGameEnd();
+      } else if (isStalemate(newBoard, nextColor)) {
+        setGameStatus('stalemate');
+        soundManager?.playGameEnd();
+      } else if (isKingInCheck(newBoard, nextColor)) {
+        soundManager?.playCheck();
+      }
     }
 
     // Update move history
@@ -198,14 +224,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     const pieceSymbol = movingPiece.type === 'knight' ? 'N' : movingPiece.type[0].toUpperCase();
     const moveText = `${pieceSymbol}${fromSquare.includes('x') ? 'x' : ''}${toSquare}`;
     setMoveHistory(prev => [...prev, moveText]);
-
-    // Update captured pieces
-    if (isOpponentMove) {
-      const capturedPiece = newBoard[toRow][toCol].piece;
-      if (capturedPiece) {
-        handleCapture(capturedPiece);
-      }
-    }
   };
 
   const handleCapture = (capturedPiece: Piece) => {
@@ -214,6 +232,17 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       [capturedPiece.color]: [...prev[capturedPiece.color], capturedPiece]
     }));
     soundManager?.playCapture();
+  };
+
+  const handleReset = () => {
+    setBoard(initialBoard);
+    setSelectedSquare(null);
+    setValidMoves([]);
+    setMoveHistory([]);
+    setCapturedPieces({ white: [], black: [] });
+    setTurn('white');
+    setGameStatus('playing');
+    setIsPlayerTurn(playerColor === 'white');
   };
 
   const renderPiece = (piece: Piece | null) => {
@@ -232,10 +261,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     board;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center">      
       <div className="relative">
         {/* Game status overlay */}
-        {gameStatus !== 'playing' && (
+        {!isAnalysisMode && gameStatus !== 'playing' && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
             <div className="text-2xl font-bold text-white">
               {gameStatus === 'checkmate' && `${turn === 'white' ? 'Black' : 'White'} wins by checkmate!`}
@@ -301,6 +330,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
         }}
         isSoundEnabled={isSoundEnabled}
         onToggleSound={() => setIsSoundEnabled(!isSoundEnabled)}
+        isAnalysisMode={isAnalysisMode}
+        onReset={isAnalysisMode ? handleReset : undefined}
       />
     </div>
   );
