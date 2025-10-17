@@ -2,7 +2,13 @@ import { Piece, Square } from '../types/chess';
 
 type Position = { row: number; col: number };
 
-export function isValidMove(board: Square[][], from: Position, to: Position, piece: Piece): boolean {
+export function isValidMove(
+  board: Square[][], 
+  from: Position, 
+  to: Position, 
+  piece: Piece,
+  castlingRights?: { whiteKingside: boolean; whiteQueenside: boolean; blackKingside: boolean; blackQueenside: boolean }
+): boolean {
   const dx = Math.abs(to.col - from.col);
   const dy = Math.abs(to.row - from.row);
   
@@ -41,11 +47,89 @@ export function isValidMove(board: Square[][], from: Position, to: Position, pie
       return (dx === dy || dx === 0 || dy === 0) && isPathClear(board, from, to);
 
     case 'king':
-      return dx <= 1 && dy <= 1;
+      // Normal king move
+      if (dx <= 1 && dy <= 1) {
+        return true;
+      }
+      
+      // Castling
+      if (dy === 0 && dx === 2) {
+        return canCastle(board, from, to, piece, castlingRights);
+      }
+      
+      return false;
 
     default:
       return false;
   }
+}
+
+function canCastle(
+  board: Square[][], 
+  from: Position, 
+  to: Position, 
+  piece: Piece,
+  castlingRights?: { whiteKingside: boolean; whiteQueenside: boolean; blackKingside: boolean; blackQueenside: boolean }
+): boolean {
+  // King must be on starting square
+  const isWhite = piece.color === 'white';
+  const startRow = isWhite ? 7 : 0;
+  
+  if (from.row !== startRow || from.col !== 4) {
+    return false;
+  }
+  
+  // Determine if it's kingside or queenside castling
+  const isKingside = to.col === 6; // g-file
+  const isQueenside = to.col === 2; // c-file
+  
+  if (!isKingside && !isQueenside) {
+    return false;
+  }
+  
+  // Check castling rights (if provided)
+  if (castlingRights) {
+    if (isWhite && isKingside && !castlingRights.whiteKingside) return false;
+    if (isWhite && isQueenside && !castlingRights.whiteQueenside) return false;
+    if (!isWhite && isKingside && !castlingRights.blackKingside) return false;
+    if (!isWhite && isQueenside && !castlingRights.blackQueenside) return false;
+  }
+  
+  // Check if rook is present
+  const rookCol = isKingside ? 7 : 0;
+  const rook = board[startRow][rookCol].piece;
+  if (!rook || rook.type !== 'rook' || rook.color !== piece.color) {
+    return false;
+  }
+  
+  // Check if squares between king and rook are empty
+  const startCol = Math.min(from.col, rookCol);
+  const endCol = Math.max(from.col, rookCol);
+  for (let col = startCol + 1; col < endCol; col++) {
+    if (board[startRow][col].piece) {
+      return false;
+    }
+  }
+  
+  // Check if king is in check
+  if (isKingInCheck(board, piece.color)) {
+    return false;
+  }
+  
+  // Check if king passes through or ends in check
+  const direction = isKingside ? 1 : -1;
+  for (let i = 1; i <= 2; i++) {
+    const testCol = from.col + (i * direction);
+    const testBoard = JSON.parse(JSON.stringify(board));
+    testBoard[from.row][testCol].piece = piece;
+    testBoard[from.row][from.col].piece = null;
+    
+    if (isKingInCheck(testBoard, piece.color)) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 function isPathClear(board: Square[][], from: Position, to: Position): boolean {
@@ -152,4 +236,39 @@ export function isStalemate(board: Square[][], color: 'white' | 'black'): boolea
   }
 
   return true;
-} 
+}
+
+export function generateFEN(board: Square[][], activeColor: 'w' | 'b', castling: string, enPassant: string, halfmoveClock: number, fullmoveNumber: number): string {
+  let fen = '';
+  for (let row = 0; row < 8; row++) {
+    let emptyCount = 0;
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col].piece;
+      if (piece) {
+        if (emptyCount > 0) {
+          fen += emptyCount;
+          emptyCount = 0;
+        }
+        fen += piece.color === 'white' ? piece.type.toUpperCase() : piece.type.toLowerCase();
+      } else {
+        emptyCount++;
+      }
+    }
+    if (emptyCount > 0) fen += emptyCount;
+    if (row < 7) fen += '/';
+  }
+  return `${fen} ${activeColor} ${castling} ${enPassant} ${halfmoveClock} ${fullmoveNumber}`;
+}
+
+export function generatePGN(moveHistory: string[], metadata: { [key: string]: string }): string {
+  let pgn = '';
+  for (const [key, value] of Object.entries(metadata)) {
+    pgn += `[${key} "${value}"]\n`;
+  }
+  pgn += '\n';
+  moveHistory.forEach((move, index) => {
+    if (index % 2 === 0) pgn += `${Math.floor(index / 2) + 1}. `;
+    pgn += `${move} `;
+  });
+  return pgn.trim();
+}
