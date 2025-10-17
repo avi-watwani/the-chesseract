@@ -5,9 +5,8 @@ import { ChessPieces } from './ChessPieces';
 import { Socket } from 'socket.io-client';
 import { isValidMove, isKingInCheck, isCheckmate, isStalemate } from '../utils/chessLogic';
 import { soundManager } from '../utils/sounds';
-import ChessControls from './ChessControls';
 import { Piece, Square } from '../types/chess';
-import { AlertCircle, Flag, Scale, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { Flag, Scale, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
 interface ChessBoardProps {
   socket?: Socket;
@@ -178,7 +177,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
     // Check for captured piece BEFORE making the move
     const capturedPiece = newBoard[toRow][toCol].piece;
-    if (capturedPiece && (isOpponentMove || isAnalysisMode)) {
+    if (capturedPiece) {
       handleCapture(capturedPiece);
     }
 
@@ -227,9 +226,11 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   const handleCapture = (capturedPiece: Piece) => {
+    // Store the captured piece under the capturing player's color
+    const capturingColor = capturedPiece.color === 'white' ? 'black' : 'white';
     setCapturedPieces(prev => ({
       ...prev,
-      [capturedPiece.color]: [...prev[capturedPiece.color], capturedPiece]
+      [capturingColor]: [...prev[capturingColor], capturedPiece]
     }));
     soundManager?.playCapture();
   };
@@ -273,9 +274,37 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     }
   };
 
+  // Helper function to calculate net material advantage
+  const calculateNetAdvantage = (color: 'white' | 'black') => {
+    // Calculate material on the board only (not including captured pieces)
+    let whiteMaterial = 0;
+    let blackMaterial = 0;
+    
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col].piece;
+        if (piece) {
+          const points = getPiecePoints(piece);
+          if (piece.color === 'white') {
+            whiteMaterial += points;
+          } else {
+            blackMaterial += points;
+          }
+        }
+      }
+    }
+    
+    // Return signed advantage: positive means the color has advantage, negative means disadvantage
+    if (color === 'white') {
+      return whiteMaterial - blackMaterial;
+    } else {
+      return blackMaterial - whiteMaterial;
+    }
+  };
+
   // Helper function to render captured pieces
   const renderCapturedPieces = (pieces: Piece[], color: 'white' | 'black') => {
-    const totalPoints = pieces.reduce((sum, piece) => sum + getPiecePoints(piece), 0);
+    const netAdvantage = calculateNetAdvantage(color);
     
     return (
       <div className={`flex items-center gap-2 ${color === 'white' ? 'justify-end' : 'justify-start'}`}>
@@ -286,8 +315,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             </div>
           ))}
         </div>
-        {totalPoints > 0 && (
-          <span className="text-sm font-semibold text-gray-600">+{totalPoints}</span>
+        {netAdvantage > 0 && (
+          <span className="text-sm font-semibold text-green-600">
+            +{netAdvantage}
+          </span>
         )}
       </div>
     );
