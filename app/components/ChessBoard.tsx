@@ -16,39 +16,41 @@ interface ChessBoardProps {
   isAnalysisMode?: boolean;
 }
 
-const initialBoard: Square[][] = Array(8).fill(null).map((_, rowIndex) => {
-  return Array(8).fill(null).map((_, colIndex) => {
-    const file = String.fromCharCode(97 + colIndex);
-    const rank = 8 - rowIndex;
-    const position = `${file}${rank}`;
-    
-    let piece: Piece | null = null;
-    
-    if (rank === 2) {
-      piece = { type: 'pawn', color: 'white' };
-    } else if (rank === 7) {
-      piece = { type: 'pawn', color: 'black' };
-    }
-    
-    if (rank === 1 || rank === 8) {
-      const color = rank === 1 ? 'white' : 'black';
+const createInitialBoard = (): Square[][] => {
+  return Array(8).fill(null).map((_, rowIndex) => {
+    return Array(8).fill(null).map((_, colIndex) => {
+      const file = String.fromCharCode(97 + colIndex);
+      const rank = 8 - rowIndex;
+      const position = `${file}${rank}`;
       
-      if (file === 'a' || file === 'h') {
-        piece = { type: 'rook', color };
-      } else if (file === 'b' || file === 'g') {
-        piece = { type: 'knight', color };
-      } else if (file === 'c' || file === 'f') {
-        piece = { type: 'bishop', color };
-      } else if (file === 'd') {
-        piece = { type: 'queen', color };
-      } else if (file === 'e') {
-        piece = { type: 'king', color };
+      let piece: Piece | null = null;
+      
+      if (rank === 2) {
+        piece = { type: 'pawn', color: 'white' };
+      } else if (rank === 7) {
+        piece = { type: 'pawn', color: 'black' };
       }
-    }
-    
-    return { piece, position };
+      
+      if (rank === 1 || rank === 8) {
+        const color = rank === 1 ? 'white' : 'black';
+        
+        if (file === 'a' || file === 'h') {
+          piece = { type: 'rook', color };
+        } else if (file === 'b' || file === 'g') {
+          piece = { type: 'knight', color };
+        } else if (file === 'c' || file === 'f') {
+          piece = { type: 'bishop', color };
+        } else if (file === 'd') {
+          piece = { type: 'queen', color };
+        } else if (file === 'e') {
+          piece = { type: 'king', color };
+        }
+      }
+      
+      return { piece, position };
+    });
   });
-});
+};
 
 const ChessBoard: React.FC<ChessBoardProps> = ({ 
   socket, 
@@ -57,7 +59,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   isPlayable = true,
   isAnalysisMode = false
 }) => {
-  const [board, setBoard] = useState<Square[][]>(initialBoard);
+  const [board, setBoard] = useState<Square[][]>(createInitialBoard());
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [isPlayerTurn, setIsPlayerTurn] = useState(playerColor === 'white');
   const [gameStatus, setGameStatus] = useState<'playing' | 'check' | 'checkmate' | 'stalemate' | 'resigned' | 'draw'>('playing');
@@ -144,10 +146,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       const col = file.charCodeAt(0) - 97;
       const row = 8 - parseInt(rank);
       
-      // In analysis mode, allow selecting any piece
+      // In analysis mode, allow selecting pieces based on whose turn it is
       if (isAnalysisMode && board[row][col].piece) {
-        setSelectedSquare(position);
-        setValidMoves(calculateValidMoves(position));
+        // Only allow selecting pieces of the current turn color
+        if (board[row][col].piece?.color === turn) {
+          setSelectedSquare(position);
+          setValidMoves(calculateValidMoves(position));
+        }
       } else if (!isAnalysisMode && board[row][col].piece?.color === playerColor && isPlayerTurn) {
         setSelectedSquare(position);
         setValidMoves(calculateValidMoves(position));
@@ -181,8 +186,24 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       handleCapture(capturedPiece);
     }
 
+    // Check if this is a castling move
+    const isCastling = movingPiece.type === 'king' && Math.abs(toCol - fromCol) === 2;
+    
     newBoard[toRow][toCol].piece = movingPiece;
     newBoard[fromRow][fromCol].piece = null;
+    
+    // Move the rook if castling
+    if (isCastling) {
+      const isKingside = toCol > fromCol;
+      const rookFromCol = isKingside ? 7 : 0;
+      const rookToCol = isKingside ? 5 : 3; // f-file or d-file
+      
+      const rook = newBoard[fromRow][rookFromCol].piece;
+      if (rook) {
+        newBoard[fromRow][rookToCol].piece = rook;
+        newBoard[fromRow][rookFromCol].piece = null;
+      }
+    }
     
     setBoard(newBoard);
     setSelectedSquare(null);
@@ -218,10 +239,43 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     }
 
     // Update move history
-    const fromSquare = `${fromFile}${fromRank}`;
-    const toSquare = `${toFile}${toRank}`;
-    const pieceSymbol = movingPiece.type === 'knight' ? 'N' : movingPiece.type[0].toUpperCase();
-    const moveText = `${pieceSymbol}${fromSquare.includes('x') ? 'x' : ''}${toSquare}`;
+    let moveText: string;
+    if (isCastling) {
+      // Use standard castling notation
+      const isKingside = toCol > fromCol;
+      moveText = isKingside ? 'O-O' : 'O-O-O';
+    } else {
+      const toSquare = `${toFile}${toRank}`;
+      const pieceSymbol = movingPiece.type === 'knight' ? 'N' : 
+                         movingPiece.type === 'pawn' ? '' : 
+                         movingPiece.type[0].toUpperCase();
+      
+      // Check if it's a capture
+      const captureSymbol = capturedPiece ? 'x' : '';
+      
+      // For pawn captures, include the file it came from
+      const pawnFilePrefix = (movingPiece.type === 'pawn' && capturedPiece) ? fromFile : '';
+      
+      moveText = `${pieceSymbol}${pawnFilePrefix}${captureSymbol}${toSquare}`;
+    }
+    
+    // Add check or checkmate notation
+    const nextColor = isAnalysisMode ? (turn === 'white' ? 'black' : 'white') : (isPlayerTurn ? (playerColor === 'white' ? 'black' : 'white') : playerColor);
+    if (!isAnalysisMode) {
+      if (isCheckmate(newBoard, nextColor)) {
+        moveText += '#';
+      } else if (isKingInCheck(newBoard, nextColor)) {
+        moveText += '+';
+      }
+    } else {
+      // In analysis mode, always check for check/checkmate
+      if (isCheckmate(newBoard, nextColor)) {
+        moveText += '#';
+      } else if (isKingInCheck(newBoard, nextColor)) {
+        moveText += '+';
+      }
+    }
+    
     setMoveHistory(prev => [...prev, moveText]);
   };
 
@@ -236,7 +290,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   const handleReset = () => {
-    setBoard(initialBoard);
+    setBoard(createInitialBoard());
     setSelectedSquare(null);
     setValidMoves([]);
     setMoveHistory([]);
