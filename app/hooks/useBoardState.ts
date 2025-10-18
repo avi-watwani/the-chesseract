@@ -51,38 +51,44 @@ export const useBoardState = (initialFen?: string) => {
     const toCol = toFile.charCodeAt(0) - 97;
     const toRow = 8 - parseInt(toRank);
 
-    const newBoard = [...board];
-    const movingPiece = newBoard[fromRow][fromCol].piece;
+    let capturedPiece: Piece | null = null;
 
-    if (!movingPiece) return null;
+    // Use functional state update to always get the latest board state
+    setBoard(currentBoard => {
+      const newBoard = currentBoard.map(row => [...row]);
+      const movingPiece = newBoard[fromRow][fromCol].piece;
 
-    // Check for captured piece BEFORE making the move
-    const capturedPiece = newBoard[toRow][toCol].piece;
+      if (!movingPiece) return currentBoard;
 
-    // Check if this is a castling move
-    const isCastling = movingPiece.type === 'king' && Math.abs(toCol - fromCol) === 2;
-    
-    newBoard[toRow][toCol].piece = movingPiece;
-    newBoard[fromRow][fromCol].piece = null;
-    
-    // Move the rook if castling
-    if (isCastling) {
-      const isKingside = toCol > fromCol;
-      const rookFromCol = isKingside ? 7 : 0;
-      const rookToCol = isKingside ? 5 : 3;
+      // Check for captured piece BEFORE making the move
+      capturedPiece = newBoard[toRow][toCol].piece;
+
+      // Check if this is a castling move
+      const isCastling = movingPiece.type === 'king' && Math.abs(toCol - fromCol) === 2;
       
-      const rook = newBoard[fromRow][rookFromCol].piece;
-      if (rook) {
-        newBoard[fromRow][rookToCol].piece = rook;
-        newBoard[fromRow][rookFromCol].piece = null;
+      newBoard[toRow][toCol].piece = movingPiece;
+      newBoard[fromRow][fromCol].piece = null;
+      
+      // Move the rook if castling
+      if (isCastling) {
+        const isKingside = toCol > fromCol;
+        const rookFromCol = isKingside ? 7 : 0;
+        const rookToCol = isKingside ? 5 : 3;
+        
+        const rook = newBoard[fromRow][rookFromCol].piece;
+        if (rook) {
+          newBoard[fromRow][rookToCol].piece = rook;
+          newBoard[fromRow][rookFromCol].piece = null;
+        }
       }
-    }
+      
+      return newBoard;
+    });
     
-    setBoard(newBoard);
     setTurn(prevTurn => prevTurn === 'white' ? 'black' : 'white');
 
     return capturedPiece;
-  }, [board]);
+  }, []);
 
   const resetBoard = useCallback(() => {
     setBoard(createInitialBoard());

@@ -13,9 +13,12 @@ const io = new Server(httpServer, {
 
 type Player = {
   id: string;
+  userId: string; // persistent identifier across reconnections
   name: string;
   socket: any;
   connected: boolean;
+  disconnectTime?: number; // timestamp when disconnected
+  disconnectTimeout?: NodeJS.Timeout; // 60s timeout reference
 };
 
 type Game = {
@@ -28,10 +31,12 @@ type Game = {
   currentTurn: 'white' | 'black';
   status: 'waiting' | 'playing' | 'ended';
   timerInterval?: NodeJS.Timeout;
+  boardState?: string; // FEN string for game position sync
 };
 
 const waitingPlayers: Player[] = [];
 const activeGames = new Map<string, Game>();
+const userGameMap = new Map<string, string>(); // userId -> gameId mapping
 
 io.on('connection', (socket) => {
   // Add connection error handling
@@ -39,9 +44,11 @@ io.on('connection', (socket) => {
     console.error('Socket connection error:', err);
   });
 
-  socket.on('findGame', () => {
+  socket.on('findGame', (data) => {
+    const userId = data?.userId || socket.id; // fallback to socket.id if no userId provided
     const player: Player = {
       id: socket.id,
+      userId,
       name: `Player ${socket.id.slice(0, 4)}`,
       socket,
       connected: true
@@ -66,6 +73,10 @@ io.on('connection', (socket) => {
       };
       
       activeGames.set(gameId, game);
+
+      // Track users in this game
+      userGameMap.set(white.userId, gameId);
+      userGameMap.set(black.userId, gameId);
 
       // Notify players
       white.socket.emit('gameFound', {
@@ -94,7 +105,86 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('makeMove', ({ gameId, from, to }) => {
+  // Handle reconnection to existing game
+  socket.on('rejoinGame', (data) => {
+    const userId = data?.userId;
+    const gameId = data?.gameId;
+    
+    if (!userId || !gameId) {
+      socket.emit('rejoinFailed', { reason: 'Missing userId or gameId' });
+      return;
+    }
+    
+    console.log(`Rejoin attempt - userId: ${userId}, gameId: ${gameId}`);
+    
+    const game = activeGames.get(gameId);
+    if (!game) {
+      socket.emit('rejoinFailed', { reason: 'Game not found' });
+      return;
+    }
+
+    // Check if game has ended
+    if (game.status === 'ended') {
+      socket.emit('rejoinFailed', { reason: 'Game already ended' });
+      return;
+    }
+
+    // Find which player is reconnecting
+    let playerColor: 'white' | 'black' | null = null;
+    if (game.white.userId === userId) {
+      playerColor = 'white';
+    } else if (game.black.userId === userId) {
+      playerColor = 'black';
+    } else {
+      socket.emit('rejoinFailed', { reason: 'Not a player in this game' });
+      return;
+    }
+
+    const player = playerColor === 'white' ? game.white : game.black;
+    const opponent = playerColor === 'white' ? game.black : game.white;
+
+    // Cancel disconnection timeout
+    if (player.disconnectTimeout) {
+      clearTimeout(player.disconnectTimeout);
+      player.disconnectTimeout = undefined;
+    }
+
+    // Update player connection
+    player.id = socket.id;
+    player.socket = socket;
+    player.connected = true;
+    player.disconnectTime = undefined;
+
+    console.log(`${playerColor} player reconnected to game ${gameId}`);
+
+    // Send game state to reconnecting player
+    socket.emit('gameRejoined', {
+      gameId,
+      color: playerColor,
+      opponent: opponent.name,
+      whiteTime: game.whiteTime,
+      blackTime: game.blackTime,
+      currentTurn: game.currentTurn,
+      moves: game.moves,
+      boardState: game.boardState
+    });
+
+    // Notify opponent of reconnection
+    if (opponent.connected) {
+      opponent.socket.emit('opponentReconnected', {
+        playerColor
+      });
+    }
+  });
+
+  socket.on('makeMove', (data) => {
+    const gameId = data?.gameId;
+    const from = data?.from;
+    const to = data?.to;
+    const boardState = data?.boardState;
+    
+    if (!gameId || !from || !to) return;
+    
     const game = activeGames.get(gameId);
     if (!game) return;
 
@@ -108,6 +198,11 @@ io.on('connection', (socket) => {
 
     game.moves.push(`${from}-${to}`);
     
+    // Store board state for reconnection sync
+    if (boardState) {
+      game.boardState = boardState;
+    }
+    
     // Switch turn (this automatically switches which timer counts down)
     game.currentTurn = game.currentTurn === 'white' ? 'black' : 'white';
     
@@ -115,7 +210,10 @@ io.on('connection', (socket) => {
     opponent.socket.emit('moveMade', { from, to });
   });
 
-  socket.on('resign', ({ gameId }) => {
+  socket.on('resign', (data) => {
+    const gameId = data?.gameId;
+    if (!gameId) return;
+    
     const game = activeGames.get(gameId);
     if (!game) return;
 
@@ -125,7 +223,10 @@ io.on('connection', (socket) => {
     endGame(gameId, winner, 'resignation');
   });
 
-  socket.on('drawOffer', ({ gameId }) => {
+  socket.on('drawOffer', (data) => {
+    const gameId = data?.gameId;
+    if (!gameId) return;
+    
     const game = activeGames.get(gameId);
     if (!game) return;
 
@@ -144,24 +245,57 @@ io.on('connection', (socket) => {
       waitingPlayers.splice(waitingIndex, 1);
     }
 
-    // Handle active games - TIMER KEEPS RUNNING
+    // Handle active games - Start 60-second grace period
     for (const [gameId, game] of activeGames.entries()) {
       if (game.white.id === socket.id) {
-        game.white.connected = false;
-        game.black.socket.emit('opponentDisconnected', {
-          timeRemaining: game.whiteTime
-        });
-        console.log(`White player disconnected from game ${gameId}, timer continues...`);
+        handlePlayerDisconnect(gameId, game, 'white');
       } else if (game.black.id === socket.id) {
-        game.black.connected = false;
-        game.white.socket.emit('opponentDisconnected', {
-          timeRemaining: game.blackTime
-        });
-        console.log(`Black player disconnected from game ${gameId}, timer continues...`);
+        handlePlayerDisconnect(gameId, game, 'black');
       }
     }
   });
 });
+
+// Disconnection handling with 60-second grace period
+function handlePlayerDisconnect(gameId: string, game: Game, playerColor: 'white' | 'black') {
+  const player = playerColor === 'white' ? game.white : game.black;
+  const opponent = playerColor === 'white' ? game.black : game.white;
+
+  player.connected = false;
+  player.disconnectTime = Date.now();
+
+  console.log(`${playerColor} player disconnected from game ${gameId}, starting 60s grace period...`);
+
+  // Notify opponent
+  opponent.socket.emit('opponentDisconnected', {
+    playerColor,
+    gracePeriodSeconds: 60
+  });
+
+  // Start 60-second countdown
+  player.disconnectTimeout = setTimeout(() => {
+    handleDisconnectTimeout(gameId, playerColor);
+  }, 60000);
+}
+
+function handleDisconnectTimeout(gameId: string, disconnectedPlayerColor: 'white' | 'black') {
+  const game = activeGames.get(gameId);
+  if (!game) return;
+
+  const disconnectedPlayer = disconnectedPlayerColor === 'white' ? game.white : game.black;
+  
+  // Check if player reconnected during grace period
+  if (disconnectedPlayer.connected) {
+    console.log(`Player reconnected during grace period, timeout cancelled`);
+    return;
+  }
+
+  console.log(`Grace period expired for ${disconnectedPlayerColor} in game ${gameId}`);
+  
+  // Declare opponent as winner
+  const winner = disconnectedPlayerColor === 'white' ? 'black' : 'white';
+  endGame(gameId, winner, 'disconnection');
+}
 
 // Timer management functions
 function startGameTimer(gameId: string) {
@@ -226,6 +360,18 @@ function endGame(gameId: string, winner: 'white' | 'black' | 'draw', reason: str
   if (game.timerInterval) {
     clearInterval(game.timerInterval);
   }
+
+  // Clear any disconnect timeouts
+  if (game.white.disconnectTimeout) {
+    clearTimeout(game.white.disconnectTimeout);
+  }
+  if (game.black.disconnectTimeout) {
+    clearTimeout(game.black.disconnectTimeout);
+  }
+
+  // Remove from userGameMap
+  userGameMap.delete(game.white.userId);
+  userGameMap.delete(game.black.userId);
 
   game.status = 'ended';
 

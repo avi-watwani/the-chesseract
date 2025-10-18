@@ -33,6 +33,52 @@ export default function PlayPage() {
     }
   }, [isSoundEnabled]);
 
+  // Listen for game state sync after reconnection
+  useEffect(() => {
+    const handleGameStateSync = (event: any) => {
+      const { whiteTime, blackTime, currentTurn, moves, boardState } = event.detail;
+      
+      console.log('Game state sync received:', { whiteTime, blackTime, currentTurn, moves });
+      
+      // Restore timer values
+      setWhiteTimeLeft(whiteTime);
+      setBlackTimeLeft(blackTime);
+      
+      // Replay all moves to restore board state
+      if (moves && moves.length > 0) {
+        // Reset to initial state
+        resetBoard();
+        resetMoveHistory();
+        setCapturedPieces({ white: [], black: [] });
+        
+        // Replay all moves synchronously
+        replayMoves(moves);
+      }
+      
+      console.log('Board state restoration initiated');
+    };
+    
+    window.addEventListener('gameStateSync', handleGameStateSync);
+    
+    return () => {
+      window.removeEventListener('gameStateSync', handleGameStateSync);
+    };
+  }, []);
+
+  // Function to replay moves synchronously
+  const replayMoves = (moves: string[]) => {
+    console.log(`Replaying ${moves.length} moves to restore board state...`);
+    
+    // Replay all moves - they will execute in order due to functional state updates
+    moves.forEach((move: string, index: number) => {
+      const [from, to] = move.split('-');
+      makeMove(from, to);
+      console.log(`Replayed move ${index + 1}/${moves.length}: ${from}-${to}`);
+    });
+    
+    console.log('All moves replayed successfully');
+  };
+
   // Listen for socket events (opponent moves, timer updates, game end)
   useEffect(() => {
     if (!socket || !gameState.gameId) return;
@@ -223,13 +269,36 @@ export default function PlayPage() {
               </div>
             </div>
 
+            {/* Opponent disconnection notification */}
+            {gameState.opponentDisconnected && (
+              <div className="fixed top-24 right-8 z-10">
+                <div className="bg-yellow-600/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg animate-pulse">
+                  <span className="text-sm font-semibold">⚠️ Opponent disconnected</span>
+                  <span className="text-xs ml-2">(60s grace period)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Reconnecting notification */}
+            {gameState.reconnecting && (
+              <div className="fixed top-24 right-8 z-10">
+                <div className="bg-blue-600/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
+                  <span className="text-sm font-semibold">🔄 Reconnecting to game...</span>
+                </div>
+              </div>
+            )}
+
             {/* Centered chess board with clocks on the right */}
             <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
               {/* Chess board - centered */}
               <div className="flex flex-col items-center">
-                {/* Black captured pieces (above board) */}
+                {/* Opponent's captured pieces (above board) */}
                 <div className="mb-2 w-full max-w-[512px] px-2">
-                  <CapturedPieces pieces={capturedPieces.black} color="black" board={board} />
+                  <CapturedPieces 
+                    pieces={gameState.playerColor === 'white' ? capturedPieces.black : capturedPieces.white} 
+                    color={gameState.playerColor === 'white' ? 'black' : 'white'} 
+                    board={board} 
+                  />
                 </div>
 
                 <div className="glassmorphism p-6 rounded-xl">
@@ -246,51 +315,71 @@ export default function PlayPage() {
                   />
                 </div>
 
-                {/* White captured pieces (below board) */}
+                {/* Player's captured pieces (below board) */}
                 <div className="mt-2 w-full max-w-[512px] px-2">
-                  <CapturedPieces pieces={capturedPieces.white} color="white" board={board} />
+                  <CapturedPieces 
+                    pieces={gameState.playerColor === 'white' ? capturedPieces.white : capturedPieces.black} 
+                    color={gameState.playerColor === 'white' ? 'white' : 'black'} 
+                    board={board} 
+                  />
                 </div>
               </div>
 
               {/* Clocks positioned to the right of the board */}
               <div className="ml-8 flex flex-col gap-4">
-                {/* Black player timer */}
+                {/* Opponent's timer (top) */}
                 <div className={`backdrop-blur px-6 py-4 rounded-lg shadow-lg transition-all ${
-                  gameState.playerColor === 'black' && isPlayerTurn 
+                  !isPlayerTurn
                     ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105' 
-                    : gameState.playerColor === 'white' && !isPlayerTurn
-                    ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105'
                     : 'bg-gray-900/90'
                 }`}>
                   <div className="flex flex-col items-center space-y-2">
-                    <div className="text-4xl">♚</div>
+                    <div className="text-4xl">{gameState.playerColor === 'white' ? '♚' : '♔'}</div>
                     <div className="flex items-center gap-2">
-                      <Clock className={blackTimeLeft < 60 ? 'text-red-400 w-5 h-5' : 'text-white w-5 h-5'} />
-                      <span className={`text-2xl font-mono font-bold ${blackTimeLeft < 60 ? 'text-red-400' : 'text-white'}`}>
-                        {formatTime(blackTimeLeft)}
+                      <Clock className={
+                        (gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft) < 60 
+                          ? 'text-red-400 w-5 h-5' 
+                          : 'text-white w-5 h-5'
+                      } />
+                      <span className={`text-2xl font-mono font-bold ${
+                        (gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft) < 60 
+                          ? 'text-red-400' 
+                          : 'text-white'
+                      }`}>
+                        {formatTime(gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-400 uppercase tracking-wide">Black</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wide">
+                      {gameState.playerColor === 'white' ? 'Black' : 'White'}
+                    </div>
                   </div>
                 </div>
 
-                {/* White player timer */}
+                {/* Player's timer (bottom) */}
                 <div className={`backdrop-blur px-6 py-4 rounded-lg shadow-lg transition-all ${
-                  gameState.playerColor === 'white' && isPlayerTurn 
+                  isPlayerTurn
                     ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105' 
-                    : gameState.playerColor === 'black' && !isPlayerTurn
-                    ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105'
                     : 'bg-gray-900/90'
                 }`}>
                   <div className="flex flex-col items-center space-y-2">
-                    <div className="text-4xl">♔</div>
+                    <div className="text-4xl">{gameState.playerColor === 'white' ? '♔' : '♚'}</div>
                     <div className="flex items-center gap-2">
-                      <Clock className={whiteTimeLeft < 60 ? 'text-red-400 w-5 h-5' : 'text-white w-5 h-5'} />
-                      <span className={`text-2xl font-mono font-bold ${whiteTimeLeft < 60 ? 'text-red-400' : 'text-white'}`}>
-                        {formatTime(whiteTimeLeft)}
+                      <Clock className={
+                        (gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft) < 60 
+                          ? 'text-red-400 w-5 h-5' 
+                          : 'text-white w-5 h-5'
+                      } />
+                      <span className={`text-2xl font-mono font-bold ${
+                        (gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft) < 60 
+                          ? 'text-red-400' 
+                          : 'text-white'
+                      }`}>
+                        {formatTime(gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-400 uppercase tracking-wide">White</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wide">
+                      {gameState.playerColor === 'white' ? 'White' : 'Black'}
+                    </div>
                   </div>
                 </div>
               </div>
