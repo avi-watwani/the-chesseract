@@ -1,0 +1,21 @@
+{
+  "name": "chesseract-server",
+  "version": "1.0.0",
+  "description": "WebSocket server for The Chesseract online chess game",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "ts-node index.ts",
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.6.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}
+

@@ -10,6 +10,7 @@ import { useBoardState } from '../../hooks/useBoardState';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useSocketGame } from '../../hooks/useSocketGame';
 import { useMoveHistory } from '../../hooks/useMoveHistory';
+import { useArrows } from '../../hooks/useArrows';
 import { soundManager } from '../../utils/sounds';
 import { Clock, Users } from 'lucide-react';
 import { Piece } from '../../types/chess';
@@ -19,11 +20,12 @@ export default function PlayPage() {
   const { board, selectedSquare, setSelectedSquare, makeMove, resetBoard } = useBoardState();
   const { calculateValidMoves, checkGameStatus } = useGameLogic(board, gameState.playerColor || 'white');
   const { moveHistory, addMove, reset: resetMoveHistory } = useMoveHistory();
+  const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [validMoves, setValidMoves] = useState<string[]>([]);
   const [capturedPieces, setCapturedPieces] = useState<{ white: Piece[], black: Piece[] }>({ white: [], black: [] });
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-  const [whiteTimeLeft, setWhiteTimeLeft] = useState(600); // 10 minutes
-  const [blackTimeLeft, setBlackTimeLeft] = useState(600); // 10 minutes
+  const [whiteTimeLeft, setWhiteTimeLeft] = useState(600); // 10 minutes - updated by server
+  const [blackTimeLeft, setBlackTimeLeft] = useState(600); // 10 minutes - updated by server
 
   useEffect(() => {
     if (soundManager) {
@@ -31,60 +33,7 @@ export default function PlayPage() {
     }
   }, [isSoundEnabled]);
 
-  // Chess clock countdown logic
-  useEffect(() => {
-    if (gameState.status !== 'playing') return;
-
-    const interval = setInterval(() => {
-      if (isPlayerTurn && gameState.playerColor) {
-        // Decrement the current player's time
-        if (gameState.playerColor === 'white') {
-          setWhiteTimeLeft(prev => {
-            if (prev <= 0) {
-              // Time expired - player loses
-              clearInterval(interval);
-              handleResign(); // Automatically resign when time runs out
-              return 0;
-            }
-            return prev - 1;
-          });
-        } else {
-          setBlackTimeLeft(prev => {
-            if (prev <= 0) {
-              clearInterval(interval);
-              handleResign();
-              return 0;
-            }
-            return prev - 1;
-          });
-        }
-      } else if (!isPlayerTurn && gameState.playerColor) {
-        // Decrement opponent's time
-        const opponentColor = gameState.playerColor === 'white' ? 'black' : 'white';
-        if (opponentColor === 'white') {
-          setWhiteTimeLeft(prev => {
-            if (prev <= 0) {
-              clearInterval(interval);
-              return 0;
-            }
-            return prev - 1;
-          });
-        } else {
-          setBlackTimeLeft(prev => {
-            if (prev <= 0) {
-              clearInterval(interval);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [gameState.status, isPlayerTurn, gameState.playerColor]);
-
-  // Listen for opponent moves via socket
+  // Listen for socket events (opponent moves, timer updates, game end)
   useEffect(() => {
     if (!socket || !gameState.gameId) return;
 
@@ -123,15 +72,36 @@ export default function PlayPage() {
       setIsPlayerTurn(true);
     };
 
+    // Listen for timer updates from server
+    const handleTimerUpdate = ({ whiteTime, blackTime }: { whiteTime: number; blackTime: number }) => {
+      setWhiteTimeLeft(whiteTime);
+      setBlackTimeLeft(blackTime);
+    };
+
+    // Listen for game end due to timeout
+    const handleTimeoutLoss = ({ winner, loser }: { winner: string; loser: string }) => {
+      soundManager?.playGameEnd();
+      alert(`Time's up! ${winner} wins by timeout.`);
+    };
+
     socket.on('moveMade', handleOpponentMove);
+    socket.on('timerUpdate', handleTimerUpdate);
+    socket.on('timeoutLoss', handleTimeoutLoss);
 
     return () => {
       socket.off('moveMade', handleOpponentMove);
+      socket.off('timerUpdate', handleTimerUpdate);
+      socket.off('timeoutLoss', handleTimeoutLoss);
     };
   }, [socket, gameState.gameId, board, makeMove, addMove, checkGameStatus, setIsPlayerTurn, gameState.playerColor]);
 
   const handleSquareClick = (position: string) => {
     if (!isPlayerTurn || gameState.status !== 'playing') return;
+
+    // Clear arrows on left click
+    if (arrows.length > 0) {
+      clearArrows();
+    }
 
     if (selectedSquare === position) {
       setSelectedSquare(null);
@@ -270,6 +240,9 @@ export default function PlayPage() {
                     onSquareClick={handleSquareClick}
                     orientation={gameState.playerColor}
                     isInteractive={true}
+                    arrows={arrows}
+                    onSquareRightClick={startDrawing}
+                    onSquareRightRelease={finishDrawing}
                   />
                 </div>
 

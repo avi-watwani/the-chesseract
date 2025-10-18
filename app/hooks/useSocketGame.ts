@@ -29,26 +29,31 @@ export const useSocketGame = (): SocketGameHook => {
 
   useEffect(() => {
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    console.log('Connecting to WebSocket server at:', socketUrl);
+    
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-      timeout: 10000
+      timeout: 10000,
+      autoConnect: true
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('✅ WebSocket connected successfully to', socketUrl);
       setSocket(newSocket);
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+      console.error('❌ WebSocket connection error:', error.message);
+      console.error('Make sure the server is running on port 3001');
+      console.error('Run: cd server && npm run dev');
       setSearchingForGame(false);
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
+      console.log('WebSocket disconnected:', reason);
       setSearchingForGame(false);
     });
 

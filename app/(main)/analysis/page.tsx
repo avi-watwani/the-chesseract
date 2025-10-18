@@ -9,6 +9,7 @@ import { GameControls } from '../../components/chess/GameControls';
 import { useBoardState } from '../../hooks/useBoardState';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useMoveHistory } from '../../hooks/useMoveHistory';
+import { useArrows } from '../../hooks/useArrows';
 import { soundManager } from '../../utils/sounds';
 import { Piece } from '../../types/chess';
 import { RotateCcw } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function AnalysisPage() {
   const { board, turn, selectedSquare, setSelectedSquare, makeMove, resetBoard, setBoard, setTurn } = useBoardState();
   const { calculateValidMoves, checkGameStatus } = useGameLogic(board, turn);
   const { moveHistory, addMove, canUndo, canRedo, undo, redo, reset: resetMoveHistory } = useMoveHistory();
+  const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [validMoves, setValidMoves] = useState<string[]>([]);
   const [capturedPieces, setCapturedPieces] = useState<{ white: Piece[], black: Piece[] }>({ white: [], black: [] });
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
@@ -31,6 +33,11 @@ export default function AnalysisPage() {
   }, [isSoundEnabled]);
 
   const handleSquareClick = (position: string) => {
+    // Clear arrows on left click
+    if (arrows.length > 0) {
+      clearArrows();
+    }
+
     if (selectedSquare === position) {
       setSelectedSquare(null);
       setValidMoves([]);
@@ -150,6 +157,9 @@ export default function AnalysisPage() {
               onSquareClick={handleSquareClick}
               orientation={orientation}
               isInteractive={true}
+              arrows={arrows}
+              onSquareRightClick={startDrawing}
+              onSquareRightRelease={finishDrawing}
             />
           </div>
 

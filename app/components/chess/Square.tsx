@@ -11,6 +11,8 @@ interface SquareProps {
   onClick: () => void;
   onDrop?: (piece: PieceType, position: string) => void;
   isDraggable?: boolean;
+  onRightMouseDown?: (position: string) => void;
+  onRightMouseUp?: (position: string) => void;
 }
 
 export const Square: React.FC<SquareProps> = ({
@@ -21,7 +23,9 @@ export const Square: React.FC<SquareProps> = ({
   isValidMove,
   onClick,
   onDrop,
-  isDraggable = false
+  isDraggable = false,
+  onRightMouseDown,
+  onRightMouseUp
 }) => {
   const handleDragOver = (e: React.DragEvent) => {
     if (onDrop) {
@@ -40,6 +44,27 @@ export const Square: React.FC<SquareProps> = ({
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Right click (button 2)
+    if (e.button === 2 && onRightMouseDown) {
+      e.preventDefault();
+      onRightMouseDown(position);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    // Right click (button 2)
+    if (e.button === 2 && onRightMouseUp) {
+      e.preventDefault();
+      onRightMouseUp(position);
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    // Prevent context menu from appearing on right-click
+    e.preventDefault();
+  };
+
   return (
     <div
       className={`
@@ -50,6 +75,9 @@ export const Square: React.FC<SquareProps> = ({
         hover:opacity-90 transition-opacity
       `}
       onClick={onClick}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >

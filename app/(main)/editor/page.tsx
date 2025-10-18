@@ -6,11 +6,13 @@ import PageContainer from '../../components/PageContainer';
 import { ChessBoardCore } from '../../components/chess/ChessBoardCore';
 import { PiecePalette } from '../../components/chess/PiecePalette';
 import { useBoardState } from '../../hooks/useBoardState';
+import { useArrows } from '../../hooks/useArrows';
 import { Piece } from '../../types/chess';
 import { Trash2, FileText, Play } from 'lucide-react';
 
 export default function EditorPage() {
   const { board, clearBoard, setPieceAt, resetBoard } = useBoardState();
+  const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [fenInput, setFenInput] = useState('');
   const router = useRouter();
 
@@ -19,8 +21,13 @@ export default function EditorPage() {
   };
 
   const handleSquareClick = (position: string) => {
-    // Right-click or secondary action to remove piece
-    // For now, we'll use a simple click to remove
+    // Clear arrows on left click
+    if (arrows.length > 0) {
+      clearArrows();
+      return;
+    }
+    
+    // Click to remove piece
     const [file, rank] = position.split('');
     const col = file.charCodeAt(0) - 97;
     const row = 8 - parseInt(rank);
@@ -62,9 +69,12 @@ export default function EditorPage() {
               isInteractive={true}
               onPieceDrop={handlePieceDrop}
               isDraggable={true}
+              arrows={arrows}
+              onSquareRightClick={startDrawing}
+              onSquareRightRelease={finishDrawing}
             />
           </div>
-          <p className="text-sm text-gray-400 mt-3">Click a piece to remove it from the board</p>
+          <p className="text-sm text-gray-400 mt-3">Right-click and drag to draw arrows • Click a piece to remove it</p>
 
           {/* Controls below board */}
           <div className="mt-8 flex gap-4 max-w-5xl w-full">
