@@ -89,7 +89,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1 text-white">Email</h4>
-                    <p className="text-gray-300">contact@chesseractindia.com</p>
+                    <a href="mailto:support@chesseractindia.com" className="text-gray-300 hover:underline">support@chesseractindia.com</a>
                   </div>
                 </div>
                 
