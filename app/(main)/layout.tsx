@@ -9,7 +9,7 @@ export default function MainLayout({
   return (
     <>
       <Navbar />
-      <main className="pt-16">{children}</main>
+      <main className="pt-20">{children}</main>
       <Footer />
     </>
   )

@@ -39,12 +39,12 @@ const Navbar = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 h-20 ${
         isScrolled ? 'bg-gray-900/90 backdrop-blur-md shadow-lg' : 'bg-transparent'
       }`}
     >
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4 h-full flex items-center">
+        <div className="flex items-center justify-between w-full">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold text-white">The Chesseract</span>
