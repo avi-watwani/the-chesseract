@@ -12,7 +12,7 @@ interface ChessBoardCoreProps {
   onSquareClick: (position: string) => void;
   orientation?: 'white' | 'black';
   isInteractive?: boolean;
-  onPieceDrop?: (piece: Piece, position: string) => void;
+  onPieceDrop?: (piece: Piece, position: string, sourcePosition?: string) => void;
   isDraggable?: boolean;
   arrows?: Arrow[];
   onSquareRightClick?: (position: string) => void;

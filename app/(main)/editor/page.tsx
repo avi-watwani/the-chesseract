@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import PageContainer from '../../components/PageContainer';
 import { ChessBoardCore } from '../../components/chess/ChessBoardCore';
 import { PiecePalette } from '../../components/chess/PiecePalette';
+import { PieceBin } from '../../components/chess/PieceBin';
 import { useBoardState } from '../../hooks/useBoardState';
 import { useArrows } from '../../hooks/useArrows';
 import { Piece } from '../../types/chess';
@@ -14,27 +15,78 @@ export default function EditorPage() {
   const { board, clearBoard, setPieceAt, resetBoard } = useBoardState();
   const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [fenInput, setFenInput] = useState('');
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const router = useRouter();
 
-  const handlePieceDrop = (piece: Piece, position: string) => {
+  const handlePieceDrop = (piece: Piece, position: string, sourcePosition?: string) => {
+    // Clear selection when dragging
+    setSelectedSquare(null);
+    
+    // If piece is being moved from another square on the board, clear the source
+    if (sourcePosition && sourcePosition !== position) {
+      setPieceAt(sourcePosition, null);
+    }
+    // Place the piece at the target position
     setPieceAt(position, piece);
+  };
+
+  const handleBinDrop = (piece: Piece, sourcePosition?: string) => {
+    // Clear selection when deleting
+    setSelectedSquare(null);
+    
+    // Only delete if the piece came from the board
+    if (sourcePosition) {
+      setPieceAt(sourcePosition, null);
+    }
+    // If piece came from palette, do nothing (just ignore the drop)
   };
 
   const handleSquareClick = (position: string) => {
     // Clear arrows on left click
     if (arrows.length > 0) {
       clearArrows();
+      return;
+    }
+
+    // Tap-to-move functionality
+    if (selectedSquare === position) {
+      // Clicking the same square deselects it
+      setSelectedSquare(null);
+    } else if (selectedSquare) {
+      // Move piece from selected square to clicked position
+      const [file, rank] = selectedSquare.split('');
+      const col = file.charCodeAt(0) - 97;
+      const row = 8 - parseInt(rank);
+      
+      const piece = board[row][col].piece;
+      if (piece) {
+        // Move the piece
+        setPieceAt(selectedSquare, null);
+        setPieceAt(position, piece);
+      }
+      setSelectedSquare(null);
+    } else {
+      // Select a piece
+      const [file, rank] = position.split('');
+      const col = file.charCodeAt(0) - 97;
+      const row = 8 - parseInt(rank);
+      
+      if (board[row][col].piece) {
+        setSelectedSquare(position);
+      }
     }
   };
 
   const handleClearBoard = () => {
     clearBoard();
     clearArrows();
+    setSelectedSquare(null);
   };
 
   const handleResetBoard = () => {
     resetBoard();
     clearArrows();
+    setSelectedSquare(null);
   };
 
   const handleLoadFEN = () => {
@@ -61,7 +113,7 @@ export default function EditorPage() {
               <div className="w-[520px] h-[520px]">
                 <ChessBoardCore
                   board={board}
-                  selectedSquare={null}
+                  selectedSquare={selectedSquare}
                   validMoves={[]}
                   onSquareClick={handleSquareClick}
                   orientation="white"
@@ -74,18 +126,21 @@ export default function EditorPage() {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-2">Drag pieces from palette or move pieces on board • Right-click and drag to draw arrows</p>
+            <p className="text-xs text-gray-400 mt-2">Drag or tap to move pieces • Drag from palette to add pieces • Right-click and drag to draw arrows</p>
           </div>
 
           {/* Right sidebar with piece palette and controls */}
-          <div className="flex flex-col h-[520px] w-[300px]">
+          <div className="flex flex-col w-[300px]">
             {/* Piece Palette */}
-            <div className="mb-3">
-              <PiecePalette />
+            <PiecePalette />
+
+            {/* Piece Bin */}
+            <div className="mt-3">
+              <PieceBin onPieceDrop={handleBinDrop} />
             </div>
 
             {/* Board Actions */}
-            <div className="bg-gray-900 rounded-lg p-3 mb-3">
+            <div className="bg-gray-900 rounded-lg p-3 mt-3">
               <h3 className="text-sm font-semibold text-gray-200 mb-2">Board Actions</h3>
               <div className="flex flex-col gap-2">
                 <button
@@ -113,7 +168,7 @@ export default function EditorPage() {
             </div>
 
             {/* FEN Input */}
-            <div className="bg-gray-900 rounded-lg p-3">
+            <div className="bg-gray-900 rounded-lg p-3 mt-3">
               <h3 className="text-sm font-semibold text-gray-200 mb-2">Load from FEN</h3>
               <input
                 type="text"

@@ -9,7 +9,7 @@ interface SquareProps {
   isSelected: boolean;
   isValidMove: boolean;
   onClick: () => void;
-  onDrop?: (piece: PieceType, position: string) => void;
+  onDrop?: (piece: PieceType, position: string, sourcePosition?: string) => void;
   isDraggable?: boolean;
   onRightMouseDown?: (position: string) => void;
   onRightMouseUp?: (position: string) => void;
@@ -37,9 +37,10 @@ export const Square: React.FC<SquareProps> = ({
     e.preventDefault();
     if (onDrop) {
       const pieceData = e.dataTransfer.getData('piece');
+      const sourcePosition = e.dataTransfer.getData('sourcePosition');
       if (pieceData) {
         const droppedPiece: PieceType = JSON.parse(pieceData);
-        onDrop(droppedPiece, position);
+        onDrop(droppedPiece, position, sourcePosition || undefined);
       }
     }
   };
@@ -83,7 +84,7 @@ export const Square: React.FC<SquareProps> = ({
     >
       {piece && (
         <div className="w-12 h-12">
-          <Piece piece={piece} isDraggable={isDraggable} />
+          <Piece piece={piece} isDraggable={isDraggable} position={position} />
         </div>
       )}
       {isValidMove && !piece && (
