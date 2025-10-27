@@ -5,14 +5,13 @@ import PageContainer from '../../components/PageContainer';
 import { ChessBoardCore } from '../../components/chess/ChessBoardCore';
 import { MoveHistory } from '../../components/chess/MoveHistory';
 import { CapturedPieces } from '../../components/chess/CapturedPieces';
-import { GameControls } from '../../components/chess/GameControls';
 import { useBoardState } from '../../hooks/useBoardState';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useSocketGame } from '../../hooks/useSocketGame';
 import { useMoveHistory } from '../../hooks/useMoveHistory';
 import { useArrows } from '../../hooks/useArrows';
 import { soundManager } from '../../utils/sounds';
-import { Clock, Users } from 'lucide-react';
+import { Clock, Users, Flag, Scale } from 'lucide-react';
 import { Piece } from '../../types/chess';
 
 export default function PlayPage() {
@@ -23,15 +22,8 @@ export default function PlayPage() {
   const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [validMoves, setValidMoves] = useState<string[]>([]);
   const [capturedPieces, setCapturedPieces] = useState<{ white: Piece[], black: Piece[] }>({ white: [], black: [] });
-  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [whiteTimeLeft, setWhiteTimeLeft] = useState(600); // 10 minutes - updated by server
   const [blackTimeLeft, setBlackTimeLeft] = useState(600); // 10 minutes - updated by server
-
-  useEffect(() => {
-    if (soundManager) {
-      soundManager.setEnabled(isSoundEnabled);
-    }
-  }, [isSoundEnabled]);
 
   // Listen for game state sync after reconnection
   useEffect(() => {
@@ -230,7 +222,7 @@ export default function PlayPage() {
 
   return (
     <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-2">
         {gameState.status === 'waiting' && (
           <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
             <div className="text-center">
@@ -261,17 +253,9 @@ export default function PlayPage() {
 
         {gameState.status === 'playing' && (
           <div>
-            {/* Player info - positioned at top */}
-            <div className="fixed top-24 left-8 z-10">
-              <div className="bg-gray-900/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
-                <span className="text-sm">Playing as: <span className="font-bold capitalize">{gameState.playerColor}</span></span>
-                <span className="text-sm ml-4">vs <span className="font-bold">{gameState.opponentName}</span></span>
-              </div>
-            </div>
-
             {/* Opponent disconnection notification */}
             {gameState.opponentDisconnected && (
-              <div className="fixed top-24 right-8 z-10">
+              <div className="fixed top-20 right-8 z-10">
                 <div className="bg-yellow-600/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg animate-pulse">
                   <span className="text-sm font-semibold">⚠️ Opponent disconnected</span>
                   <span className="text-xs ml-2">(60s grace period)</span>
@@ -281,67 +265,59 @@ export default function PlayPage() {
 
             {/* Reconnecting notification */}
             {gameState.reconnecting && (
-              <div className="fixed top-24 right-8 z-10">
+              <div className="fixed top-20 right-8 z-10">
                 <div className="bg-blue-600/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
                   <span className="text-sm font-semibold">🔄 Reconnecting to game...</span>
                 </div>
               </div>
             )}
 
-            {/* Centered chess board with clocks on the right */}
-            <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-              {/* Chess board - centered */}
+            {/* Board and sidebar layout */}
+            <div className="flex items-center justify-center gap-6 h-[calc(100vh-120px)]">
+              {/* Chess board on the left */}
               <div className="flex flex-col items-center">
-                {/* Opponent's captured pieces (above board) */}
-                <div className="mb-2 w-full max-w-[512px] px-2">
-                  <CapturedPieces 
-                    pieces={gameState.playerColor === 'white' ? capturedPieces.black : capturedPieces.white} 
-                    color={gameState.playerColor === 'white' ? 'black' : 'white'} 
-                    board={board} 
-                  />
-                </div>
-
-                <div className="glassmorphism p-6 rounded-xl">
-                  <ChessBoardCore
-                    board={board}
-                    selectedSquare={selectedSquare}
-                    validMoves={validMoves}
-                    onSquareClick={handleSquareClick}
-                    orientation={gameState.playerColor}
-                    isInteractive={true}
-                    arrows={arrows}
-                    onSquareRightClick={startDrawing}
-                    onSquareRightRelease={finishDrawing}
-                  />
-                </div>
-
-                {/* Player's captured pieces (below board) */}
-                <div className="mt-2 w-full max-w-[512px] px-2">
-                  <CapturedPieces 
-                    pieces={gameState.playerColor === 'white' ? capturedPieces.white : capturedPieces.black} 
-                    color={gameState.playerColor === 'white' ? 'white' : 'black'} 
-                    board={board} 
-                  />
+                {/* Chess board */}
+                <div className="glassmorphism p-3 rounded-xl">
+                  <div className="w-[520px] h-[520px]">
+                    <ChessBoardCore
+                      board={board}
+                      selectedSquare={selectedSquare}
+                      validMoves={validMoves}
+                      onSquareClick={handleSquareClick}
+                      orientation={gameState.playerColor}
+                      isInteractive={true}
+                      arrows={arrows}
+                      onSquareRightClick={startDrawing}
+                      onSquareRightRelease={finishDrawing}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Clocks positioned to the right of the board */}
-              <div className="ml-8 flex flex-col gap-4">
-                {/* Opponent's timer (top) */}
-                <div className={`backdrop-blur px-6 py-4 rounded-lg shadow-lg transition-all ${
+              {/* Right sidebar with timers and move history */}
+              <div className="flex flex-col h-[520px] w-[300px]">
+                {/* Opponent's timer */}
+                <div className={`backdrop-blur px-4 py-2.5 rounded-lg shadow-lg transition-all flex items-center justify-between ${
                   !isPlayerTurn
-                    ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105' 
-                    : 'bg-gray-900/90'
+                    ? 'bg-blue-600/90 ring-2 ring-blue-400' 
+                    : 'bg-gray-800/90'
                 }`}>
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="text-4xl">{gameState.playerColor === 'white' ? '♚' : '♔'}</div>
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-xl">{gameState.playerColor === 'white' ? '♚' : '♔'}</div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-xs">{gameState.opponentName}</span>
+                    </div>
+                  </div>
+                  <div className={`backdrop-blur px-2.5 py-1 rounded ${
+                    !isPlayerTurn ? 'bg-white/20' : 'bg-black/30'
+                  }`}>
+                    <div className="flex items-center gap-1">
                       <Clock className={
                         (gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft) < 60 
-                          ? 'text-red-400 w-5 h-5' 
-                          : 'text-white w-5 h-5'
+                          ? 'text-red-400 w-3.5 h-3.5' 
+                          : 'text-white w-3.5 h-3.5'
                       } />
-                      <span className={`text-2xl font-mono font-bold ${
+                      <span className={`text-base font-mono font-bold ${
                         (gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft) < 60 
                           ? 'text-red-400' 
                           : 'text-white'
@@ -349,27 +325,72 @@ export default function PlayPage() {
                         {formatTime(gameState.playerColor === 'white' ? blackTimeLeft : whiteTimeLeft)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-400 uppercase tracking-wide">
-                      {gameState.playerColor === 'white' ? 'Black' : 'White'}
-                    </div>
                   </div>
                 </div>
 
-                {/* Player's timer (bottom) */}
-                <div className={`backdrop-blur px-6 py-4 rounded-lg shadow-lg transition-all ${
+                {/* Opponent's captured pieces */}
+                <div className="mt-1.5">
+                  <CapturedPieces 
+                    pieces={gameState.playerColor === 'white' ? capturedPieces.black : capturedPieces.white} 
+                    color={gameState.playerColor === 'white' ? 'black' : 'white'} 
+                    board={board} 
+                  />
+                </div>
+
+                {/* Move history - fills remaining space */}
+                <div className="flex-1 mt-3 mb-3 overflow-hidden">
+                  <MoveHistory moves={moveHistory} className="h-full" />
+                </div>
+
+                {/* Game action buttons */}
+                <div className="mb-3 flex gap-2">
+                  <button
+                    onClick={handleResign}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30 transition-colors text-sm font-medium"
+                  >
+                    <Flag className="w-3.5 h-3.5" />
+                    Resign
+                  </button>
+                  <button
+                    onClick={offerDraw}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30 transition-colors text-sm font-medium"
+                  >
+                    <Scale className="w-3.5 h-3.5" />
+                    Draw
+                  </button>
+                </div>
+
+                {/* Player's captured pieces */}
+                <div className="mb-1.5">
+                  <CapturedPieces 
+                    pieces={gameState.playerColor === 'white' ? capturedPieces.white : capturedPieces.black} 
+                    color={gameState.playerColor === 'white' ? 'white' : 'black'} 
+                    board={board} 
+                  />
+                </div>
+
+                {/* Player's timer */}
+                <div className={`backdrop-blur px-4 py-2.5 rounded-lg shadow-lg transition-all flex items-center justify-between ${
                   isPlayerTurn
-                    ? 'bg-blue-600/90 ring-4 ring-blue-400 scale-105' 
-                    : 'bg-gray-900/90'
+                    ? 'bg-blue-600/90 ring-2 ring-blue-400' 
+                    : 'bg-gray-800/90'
                 }`}>
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="text-4xl">{gameState.playerColor === 'white' ? '♔' : '♚'}</div>
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-xl">{gameState.playerColor === 'white' ? '♔' : '♚'}</div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-xs">You</span>
+                    </div>
+                  </div>
+                  <div className={`backdrop-blur px-2.5 py-1 rounded ${
+                    isPlayerTurn ? 'bg-white/20' : 'bg-black/30'
+                  }`}>
+                    <div className="flex items-center gap-1">
                       <Clock className={
                         (gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft) < 60 
-                          ? 'text-red-400 w-5 h-5' 
-                          : 'text-white w-5 h-5'
+                          ? 'text-red-400 w-3.5 h-3.5' 
+                          : 'text-white w-3.5 h-3.5'
                       } />
-                      <span className={`text-2xl font-mono font-bold ${
+                      <span className={`text-base font-mono font-bold ${
                         (gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft) < 60 
                           ? 'text-red-400' 
                           : 'text-white'
@@ -377,24 +398,9 @@ export default function PlayPage() {
                         {formatTime(gameState.playerColor === 'white' ? whiteTimeLeft : blackTimeLeft)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-400 uppercase tracking-wide">
-                      {gameState.playerColor === 'white' ? 'White' : 'Black'}
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Move history and controls below board */}
-            <div className="mt-8 flex justify-center gap-4 max-w-4xl mx-auto">
-              <MoveHistory moves={moveHistory} className="flex-1" />
-              <GameControls
-                mode="play"
-                onResign={handleResign}
-                onDrawOffer={offerDraw}
-                isSoundEnabled={isSoundEnabled}
-                onToggleSound={() => setIsSoundEnabled(!isSoundEnabled)}
-              />
             </div>
           </div>
         )}

@@ -68,7 +68,7 @@ export const Square: React.FC<SquareProps> = ({
   return (
     <div
       className={`
-        w-16 h-16 flex items-center justify-center relative
+        w-[65px] h-[65px] flex items-center justify-center relative
         ${isLight ? 'bg-gray-200' : 'bg-gray-600'}
         ${isSelected ? 'ring-2 ring-yellow-400' : ''}
         ${isValidMove ? 'cursor-pointer' : ''}

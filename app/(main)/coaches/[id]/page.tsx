@@ -12,7 +12,7 @@ type Coach = {
   title: string;
   title_short: string;
   shortBio: string;
-  longBio: string;
+  longBio: string[];
   image: string;
   achievements?: string[];
 };
@@ -27,7 +27,13 @@ const coaches: Coach[] = [
     title: "International Master",
     title_short: "IM",
     shortBio: "Winner of multiple online tournaments",
-    longBio: "Avi Watwani is a professional chess player and coach with over 12 years of experience in the game. Holding a 2000+ rating on major online chess platforms, he ranks among the top 10% of players worldwide. Over the years, Avi has participated in and won multiple online tournaments, developing a deep understanding of the strategic and psychological aspects of chess. For the past four years, he has been mentoring young players aged 5 to 15 years, helping them strengthen their foundations in openings, tactics, endgames, and overall chess understanding. Passionate about teaching, Avi focuses on making chess both fun and intellectually stimulating for his students — guiding them from beginner concepts to advanced competitive preparation. He firmly believes that “in chess, with every game played — win or lose — you are one move closer to greatness.",
+    longBio: [
+      "Avi Watwani is a professional chess player and coach with over 12 years of experience in the game. Holding a 2000+ rating on major online chess platforms, he ranks among the top 10% of players worldwide.",
+      "Over the years, Avi has participated in and won multiple online tournaments, developing a deep understanding of the strategic and psychological aspects of chess.",
+      "For the past four years, he has been mentoring young players aged 5 to 15 years, helping them strengthen their foundations in openings, tactics, endgames, and overall chess understanding.",
+      "Passionate about teaching, Avi focuses on making chess both fun and intellectually stimulating for his students — guiding them from beginner concepts to advanced competitive preparation.",
+      "He firmly believes that \"in chess, with every game played — win or lose — you are one move closer to greatness.\""
+    ],
     image: "/images/coach-1.jpg",
     achievements: ["Founder of Chess Academy", "Top 10% in the world"]
   },
@@ -39,7 +45,10 @@ const coaches: Coach[] = [
     title: "Grandmaster",
     title_short: "GM",
     shortBio: "Renowned opening expert and attacking specialist",
-    longBio: "Grandmaster John Doe is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters. John's teaching approach focuses on understanding the principles behind moves rather than memorizing variations.",
+    longBio: [
+      "Grandmaster John Doe is a renowned opening theory expert and attacking specialist. He has competed at the highest level in international tournaments and has coached several grandmasters.",
+      "John's teaching approach focuses on understanding the principles behind moves rather than memorizing variations."
+    ],
     image: "/images/coach-2.jpg",
     achievements: ["Duke University Chess Team Captain", "Finalist in the World Open Chess Championship"]
   }
@@ -115,8 +124,14 @@ export default async function CoachPage({ params }: Props) {
             {/* Coach Details (Right Column) */}
             <div className="lg:w-2/3 p-8 border-t lg:border-t-0 lg:border-l border-gray-700">
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-3 text-blue-400">Biography</h3>
-                <p className="text-gray-300 leading-relaxed">{coach.longBio}</p>
+                <h3 className="text-xl font-semibold mb-4 text-blue-400">Biography</h3>
+                <div className="space-y-4">
+                  {coach.longBio.map((paragraph, index) => (
+                    <p key={index} className="text-gray-300 leading-relaxed text-base">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
               
               <div className="mb-8">

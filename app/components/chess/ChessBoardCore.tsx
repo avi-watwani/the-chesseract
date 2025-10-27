@@ -46,8 +46,8 @@ export const ChessBoardCore: React.FC<ChessBoardCoreProps> = ({
     let col = orientation === 'black' ? 7 - file : file;
     let row = orientation === 'black' ? rank : 7 - rank;
     
-    // Each square is 64px (w-16 h-16 in Tailwind)
-    const squareSize = 64;
+    // Each square is 65px (w-[65px] h-[65px])
+    const squareSize = 65;
     const x = col * squareSize + squareSize / 2;
     const y = row * squareSize + squareSize / 2;
     
@@ -179,8 +179,8 @@ export const ChessBoardCore: React.FC<ChessBoardCoreProps> = ({
       {arrows.length > 0 && (
         <svg
           className="absolute top-0 left-0 pointer-events-none"
-          style={{ width: '512px', height: '512px' }}
-          viewBox="0 0 512 512"
+          style={{ width: '520px', height: '520px' }}
+          viewBox="0 0 520 520"
         >
           {arrows.map((arrow, index) => renderArrow(arrow, index))}
         </svg>
