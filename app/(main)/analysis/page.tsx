@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PageContainer from '../../components/PageContainer';
 import { ChessBoardCore } from '../../components/chess/ChessBoardCore';
 import { MoveHistory } from '../../components/chess/MoveHistory';
 import { CapturedPieces } from '../../components/chess/CapturedPieces';
-import { GameControls } from '../../components/chess/GameControls';
 import { useBoardState } from '../../hooks/useBoardState';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useMoveHistory } from '../../hooks/useMoveHistory';
 import { useArrows } from '../../hooks/useArrows';
 import { soundManager } from '../../utils/sounds';
 import { Piece } from '../../types/chess';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, SkipBack, RefreshCw } from 'lucide-react';
 
 export default function AnalysisPage() {
   const { board, turn, selectedSquare, setSelectedSquare, makeMove, resetBoard, setBoard, setTurn } = useBoardState();
@@ -21,16 +20,9 @@ export default function AnalysisPage() {
   const { arrows, startDrawing, finishDrawing, clearArrows } = useArrows();
   const [validMoves, setValidMoves] = useState<string[]>([]);
   const [capturedPieces, setCapturedPieces] = useState<{ white: Piece[], black: Piece[] }>({ white: [], black: [] });
-  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [boardHistory, setBoardHistory] = useState<any[]>([]);
   const [capturedHistory, setCapturedHistory] = useState<any[]>([]);
   const [orientation, setOrientation] = useState<'white' | 'black'>('white');
-
-  useEffect(() => {
-    if (soundManager) {
-      soundManager.setEnabled(isSoundEnabled);
-    }
-  }, [isSoundEnabled]);
 
   const handleSquareClick = (position: string) => {
     // Clear arrows on left click
@@ -106,6 +98,7 @@ export default function AnalysisPage() {
     setCapturedHistory([]);
     setSelectedSquare(null);
     setValidMoves([]);
+    clearArrows();
   };
 
   const handleUndo = () => {
@@ -130,57 +123,82 @@ export default function AnalysisPage() {
 
   return (
     <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Flip Board Button - positioned absolutely */}
-        <div className="fixed top-24 right-8 z-10">
-          <button
-            onClick={handleFlipBoard}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Flip Board
-          </button>
-        </div>
-
-        {/* Centered chess board */}
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-          {/* Black captured pieces (above board) */}
-          <div className="mb-2 w-full max-w-[512px] px-2">
-            <CapturedPieces pieces={capturedPieces.black} color="black" board={board} />
+      <div className="container mx-auto px-4 py-2">
+        {/* Board and sidebar layout */}
+        <div className="flex items-center justify-center gap-6 h-[calc(100vh-120px)]">
+          {/* Chess board on the left */}
+          <div className="flex flex-col items-center">
+            {/* Chess board */}
+            <div className="glassmorphism p-3 rounded-xl">
+              <div className="w-[520px] h-[520px]">
+                <ChessBoardCore
+                  board={board}
+                  selectedSquare={selectedSquare}
+                  validMoves={validMoves}
+                  onSquareClick={handleSquareClick}
+                  orientation={orientation}
+                  isInteractive={true}
+                  arrows={arrows}
+                  onSquareRightClick={startDrawing}
+                  onSquareRightRelease={finishDrawing}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="glassmorphism p-6 rounded-xl">
-            <ChessBoardCore
-              board={board}
-              selectedSquare={selectedSquare}
-              validMoves={validMoves}
-              onSquareClick={handleSquareClick}
-              orientation={orientation}
-              isInteractive={true}
-              arrows={arrows}
-              onSquareRightClick={startDrawing}
-              onSquareRightRelease={finishDrawing}
-            />
-          </div>
+          {/* Right sidebar with move history and controls */}
+          <div className="flex flex-col h-[520px] w-[300px]">
+            {/* Turn indicator */}
+            <div className="backdrop-blur px-4 py-2.5 rounded-lg shadow-lg bg-gray-800/90 mb-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-300">
+                  Turn: <span className="capitalize text-white">{turn}</span>
+                </span>
+                <button
+                  onClick={handleFlipBoard}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30 transition-colors text-xs font-medium"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Flip
+                </button>
+              </div>
+            </div>
 
-          {/* White captured pieces (below board) */}
-          <div className="mt-2 w-full max-w-[512px] px-2">
-            <CapturedPieces pieces={capturedPieces.white} color="white" board={board} />
-          </div>
+            {/* Black captured pieces */}
+            <div className="mb-1.5">
+              <CapturedPieces pieces={capturedPieces.black} color="black" board={board} />
+            </div>
 
-          {/* Move history and controls below board */}
-          <div className="mt-8 flex gap-4 max-w-4xl">
-            <MoveHistory moves={moveHistory} className="flex-1" />
-            <GameControls
-              mode="analysis"
-              onReset={handleReset}
-              onUndo={handleUndo}
-              onRedo={() => {}} // Redo not fully implemented yet
-              canUndo={canUndo()}
-              canRedo={canRedo()}
-              isSoundEnabled={isSoundEnabled}
-              onToggleSound={() => setIsSoundEnabled(!isSoundEnabled)}
-            />
+            {/* Move history - fills remaining space */}
+            <div className="flex-1 my-3 overflow-hidden">
+              <MoveHistory moves={moveHistory} className="h-full" />
+            </div>
+
+            {/* Analysis control buttons */}
+            <div className="mb-3 flex flex-col gap-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleUndo}
+                  disabled={!canUndo()}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <SkipBack className="w-3.5 h-3.5" />
+                  Undo
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500/20 text-green-400 rounded-md hover:bg-green-500/30 transition-colors text-sm font-medium"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            {/* White captured pieces */}
+            <div className="mb-1.5">
+              <CapturedPieces pieces={capturedPieces.white} color="white" board={board} />
+            </div>
           </div>
         </div>
       </div>

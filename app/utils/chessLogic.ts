@@ -9,6 +9,12 @@ export function isValidMove(
   piece: Piece,
   castlingRights?: { whiteKingside: boolean; whiteQueenside: boolean; blackKingside: boolean; blackQueenside: boolean }
 ): boolean {
+  // Cannot capture your own pieces
+  const targetPiece = board[to.row][to.col].piece;
+  if (targetPiece && targetPiece.color === piece.color) {
+    return false;
+  }
+  
   const dx = Math.abs(to.col - from.col);
   const dy = Math.abs(to.row - from.row);
   
@@ -238,6 +244,28 @@ export function isStalemate(board: Square[][], color: 'white' | 'black'): boolea
   return true;
 }
 
+// Check if a move is legal (doesn't leave own king in check)
+export function isLegalMove(
+  board: Square[][], 
+  from: Position, 
+  to: Position, 
+  piece: Piece,
+  castlingRights?: { whiteKingside: boolean; whiteQueenside: boolean; blackKingside: boolean; blackQueenside: boolean }
+): boolean {
+  // First check if the move follows piece movement rules
+  if (!isValidMove(board, from, to, piece, castlingRights)) {
+    return false;
+  }
+  
+  // Then simulate the move and check if it leaves the king in check
+  const tempBoard = JSON.parse(JSON.stringify(board));
+  tempBoard[to.row][to.col].piece = piece;
+  tempBoard[from.row][from.col].piece = null;
+  
+  // Check if this move leaves our own king in check
+  return !isKingInCheck(tempBoard, piece.color);
+}
+
 export function generateFEN(board: Square[][], activeColor: 'w' | 'b', castling: string, enPassant: string, halfmoveClock: number, fullmoveNumber: number): string {
   let fen = '';
   for (let row = 0; row < 8; row++) {
@@ -249,7 +277,9 @@ export function generateFEN(board: Square[][], activeColor: 'w' | 'b', castling:
           fen += emptyCount;
           emptyCount = 0;
         }
-        fen += piece.color === 'white' ? piece.type.toUpperCase() : piece.type.toLowerCase();
+        // Map piece types to FEN notation
+        const fenChar = piece.type === 'knight' ? 'n' : piece.type.charAt(0);
+        fen += piece.color === 'white' ? fenChar.toUpperCase() : fenChar.toLowerCase();
       } else {
         emptyCount++;
       }

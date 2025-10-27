@@ -23,13 +23,13 @@ interface PiecePaletteProps {
 
 export const PiecePalette: React.FC<PiecePaletteProps> = ({ className = '' }) => {
   return (
-    <div className={`bg-gray-900 rounded-lg p-4 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-200 mb-3">Piece Palette</h3>
-      <div className="grid grid-cols-6 gap-2">
+    <div className={`bg-gray-900 rounded-lg p-3 ${className}`}>
+      <h3 className="text-sm font-semibold text-gray-200 mb-2">Piece Palette</h3>
+      <div className="grid grid-cols-6 gap-1.5">
         {pieces.map((piece, index) => (
           <div
             key={index}
-            className="w-12 h-12 bg-gray-800 rounded flex items-center justify-center hover:bg-gray-700 cursor-move"
+            className="w-10 h-10 bg-gray-800 rounded flex items-center justify-center hover:bg-gray-700 cursor-move transition-colors"
           >
             <Piece piece={piece} isDraggable={true} />
           </div>

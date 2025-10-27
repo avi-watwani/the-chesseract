@@ -24,21 +24,17 @@ export default function EditorPage() {
     // Clear arrows on left click
     if (arrows.length > 0) {
       clearArrows();
-      return;
-    }
-    
-    // Click to remove piece
-    const [file, rank] = position.split('');
-    const col = file.charCodeAt(0) - 97;
-    const row = 8 - parseInt(rank);
-    
-    if (board[row][col].piece) {
-      setPieceAt(position, null);
     }
   };
 
   const handleClearBoard = () => {
     clearBoard();
+    clearArrows();
+  };
+
+  const handleResetBoard = () => {
+    resetBoard();
+    clearArrows();
   };
 
   const handleLoadFEN = () => {
@@ -56,73 +52,81 @@ export default function EditorPage() {
 
   return (
     <PageContainer className="bg-gradient-to-b from-gray-900 to-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Centered chess board */}
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="glassmorphism p-6 rounded-xl">
-            <ChessBoardCore
-              board={board}
-              selectedSquare={null}
-              validMoves={[]}
-              onSquareClick={handleSquareClick}
-              orientation="white"
-              isInteractive={true}
-              onPieceDrop={handlePieceDrop}
-              isDraggable={true}
-              arrows={arrows}
-              onSquareRightClick={startDrawing}
-              onSquareRightRelease={finishDrawing}
-            />
+      <div className="container mx-auto px-4 py-2">
+        {/* Board and sidebar layout */}
+        <div className="flex items-center justify-center gap-6 h-[calc(100vh-120px)]">
+          {/* Chess board on the left */}
+          <div className="flex flex-col items-center">
+            <div className="glassmorphism p-3 rounded-xl">
+              <div className="w-[520px] h-[520px]">
+                <ChessBoardCore
+                  board={board}
+                  selectedSquare={null}
+                  validMoves={[]}
+                  onSquareClick={handleSquareClick}
+                  orientation="white"
+                  isInteractive={true}
+                  onPieceDrop={handlePieceDrop}
+                  isDraggable={true}
+                  arrows={arrows}
+                  onSquareRightClick={startDrawing}
+                  onSquareRightRelease={finishDrawing}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">Drag pieces from palette or move pieces on board • Right-click and drag to draw arrows</p>
           </div>
-          <p className="text-sm text-gray-400 mt-3">Right-click and drag to draw arrows • Click a piece to remove it</p>
 
-          {/* Controls below board */}
-          <div className="mt-8 flex gap-4 max-w-5xl w-full">
-            <PiecePalette className="flex-1" />
-            
-            {/* Editor Controls */}
-            <div className="bg-gray-900 rounded-lg p-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-200 mb-3">Board Actions</h3>
-              <div className="flex flex-col gap-3">
+          {/* Right sidebar with piece palette and controls */}
+          <div className="flex flex-col h-[520px] w-[300px]">
+            {/* Piece Palette */}
+            <div className="mb-3">
+              <PiecePalette />
+            </div>
+
+            {/* Board Actions */}
+            <div className="bg-gray-900 rounded-lg p-3 mb-3">
+              <h3 className="text-sm font-semibold text-gray-200 mb-2">Board Actions</h3>
+              <div className="flex flex-col gap-2">
                 <button
                   onClick={handleClearBoard}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-md hover:bg-red-500/30 transition-colors"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30 transition-colors text-sm font-medium"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   Clear Board
                 </button>
                 <button
-                  onClick={resetBoard}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-500 rounded-md hover:bg-blue-500/30 transition-colors"
+                  onClick={handleResetBoard}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30 transition-colors text-sm font-medium"
                 >
-                  <FileText className="w-4 h-4" />
-                  Reset to Starting Position
+                  <FileText className="w-3.5 h-3.5" />
+                  Reset Position
                 </button>
                 <button
                   onClick={handleAnalyzePosition}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-green-500/20 text-green-500 rounded-md hover:bg-green-500/30 transition-colors"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500/20 text-green-400 rounded-md hover:bg-green-500/30 transition-colors text-sm font-medium"
                 >
-                  <Play className="w-4 h-4" />
+                  <Play className="w-3.5 h-3.5" />
                   Analyze Position
                 </button>
               </div>
             </div>
 
             {/* FEN Input */}
-            <div className="bg-gray-900 rounded-lg p-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-200 mb-3">Load from FEN</h3>
+            <div className="bg-gray-900 rounded-lg p-3">
+              <h3 className="text-sm font-semibold text-gray-200 mb-2">Load from FEN</h3>
               <input
                 type="text"
                 value={fenInput}
                 onChange={(e) => setFenInput(e.target.value)}
                 placeholder="Paste FEN notation here"
-                className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none mb-3 text-sm"
+                className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none mb-2 text-xs"
               />
               <button
                 onClick={handleLoadFEN}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-500/20 text-purple-500 rounded-md hover:bg-purple-500/30 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-500/20 text-purple-400 rounded-md hover:bg-purple-500/30 transition-colors text-sm font-medium"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-3.5 h-3.5" />
                 Load FEN
               </button>
             </div>
