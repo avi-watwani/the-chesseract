@@ -199,6 +199,17 @@ export default function PlayPage() {
     }
   };
 
+  const handlePieceDrop = (piece: Piece, position: string, sourcePosition?: string) => {
+    // Only handle drops from board pieces when it's player's turn
+    if (!sourcePosition || !isPlayerTurn || gameState.status !== 'playing') return;
+
+    // Check if this is a valid move
+    const moves = calculateValidMoves(sourcePosition);
+    if (moves.includes(position)) {
+      handlePlayerMove(sourcePosition, position);
+    }
+  };
+
   const handleResign = () => {
     resign();
     soundManager?.playGameEnd();
@@ -286,6 +297,8 @@ export default function PlayPage() {
                       onSquareClick={handleSquareClick}
                       orientation={gameState.playerColor}
                       isInteractive={true}
+                      onPieceDrop={handlePieceDrop}
+                      isDraggable={true}
                       arrows={arrows}
                       onSquareRightClick={startDrawing}
                       onSquareRightRelease={finishDrawing}

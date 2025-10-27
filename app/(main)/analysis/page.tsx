@@ -90,6 +90,17 @@ export default function AnalysisPage() {
     }
   };
 
+  const handlePieceDrop = (piece: Piece, position: string, sourcePosition?: string) => {
+    // Only handle drops from board pieces (not from palette)
+    if (!sourcePosition) return;
+
+    // Check if this is a valid move
+    const moves = calculateValidMoves(sourcePosition);
+    if (moves.includes(position)) {
+      handleMove(sourcePosition, position);
+    }
+  };
+
   const handleReset = () => {
     resetBoard();
     resetMoveHistory();
@@ -138,6 +149,8 @@ export default function AnalysisPage() {
                   onSquareClick={handleSquareClick}
                   orientation={orientation}
                   isInteractive={true}
+                  onPieceDrop={handlePieceDrop}
+                  isDraggable={true}
                   arrows={arrows}
                   onSquareRightClick={startDrawing}
                   onSquareRightRelease={finishDrawing}

@@ -51,18 +51,26 @@ export const Piece: React.FC<PieceProps> = ({ piece, isDraggable = false, positi
       
       // Hide the piece from source square (it's now "in hand")
       setIsDragging(true);
+      
+      // Set grabbing cursor on document body during drag
+      document.body.style.cursor = 'grabbing';
     }
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
     // Show the piece again when drag ends (whether dropped successfully or not)
     setIsDragging(false);
+    
+    // Reset cursor on document body
+    document.body.style.cursor = '';
   };
 
   return (
     <div
       ref={pieceRef}
-      className="w-full h-full flex items-center justify-center cursor-move"
+      className={`w-full h-full flex items-center justify-center ${
+        isDraggable ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
+      }`}
       draggable={isDraggable}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
