@@ -69,14 +69,17 @@ export default function SignUp() {
       }
 
       // Check if username is already taken (case-insensitive)
-      // Using ilike for case-insensitive comparison as extra safety
-      const { data: existingUsers } = await supabase
+      // Fetch all usernames and compare client-side to avoid LIKE wildcard issues with _ and %
+      const { data: allProfiles } = await supabase
         .from('profiles')
         .select('username')
-        .ilike('username', username)
-        .maybeSingle()
-
-      if (existingUsers) {
+      
+      // Check if any username matches case-insensitively
+      const usernameExists = allProfiles?.some(
+        (profile) => profile.username.toLowerCase() === username.toLowerCase()
+      )
+      
+      if (usernameExists) {
         setError('Username is already taken')
         setLoading(false)
         return
@@ -181,7 +184,9 @@ export default function SignUp() {
                 <div>
                   <p className="font-semibold">Verification Email Sent!</p>
                   <p className="text-sm mt-1">
-                    We've sent a verification link to <span className="font-medium">{email}</span>{' '}
+                    We've sent a verification link to
+                    <br />
+                    <span className="font-medium">{email}</span>{' '}
                     <button 
                       onClick={handleEditEmail}
                       className="text-blue-300 hover:text-blue-200 underline text-xs"

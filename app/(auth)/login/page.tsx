@@ -37,11 +37,17 @@ export default function Login() {
 
       // If not an email, treat as username and look up email (case-insensitive)
       if (!isEmail(emailOrUsername)) {
-        const { data: profileData, error: profileError } = await supabase
+        // Fetch all profiles and find matching username client-side
+        // to avoid LIKE wildcard issues with _ and %
+        const { data: allProfiles } = await supabase
           .from('profiles')
-          .select('email')
-          .ilike('username', emailOrUsername)
-          .single()
+          .select('username, email')
+        
+        const profileData = allProfiles?.find(
+          (p) => p.username.toLowerCase() === emailOrUsername.toLowerCase()
+        )
+
+        const profileError = !profileData
 
         if (profileError || !profileData) {
           setError('Invalid username or password')
