@@ -5,12 +5,14 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { createClient } from '@/app/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
   const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -33,12 +35,12 @@ export default function Login() {
 
       let loginEmail = emailOrUsername
 
-      // If not an email, treat as username and look up email
+      // If not an email, treat as username and look up email (case-insensitive)
       if (!isEmail(emailOrUsername)) {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('email')
-          .eq('username', emailOrUsername.toLowerCase())
+          .ilike('username', emailOrUsername)
           .single()
 
         if (profileError || !profileData) {
@@ -130,14 +132,26 @@ export default function Login() {
 
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
+                  className="w-full bg-transparent text-white text-lg px-4 py-3 pr-12 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 

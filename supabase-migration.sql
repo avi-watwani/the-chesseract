@@ -1,10 +1,12 @@
 -- Create profiles table to store username and user data
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
+  username TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  -- Username preserves original case for display
+  -- Case-insensitive uniqueness enforced by index below
 );
 
 -- Enable Row Level Security
@@ -29,8 +31,8 @@ CREATE POLICY "Users can update their own profile"
   FOR UPDATE
   USING (auth.uid() = id);
 
--- Create index on username for fast lookups
-CREATE INDEX IF NOT EXISTS profiles_username_idx ON public.profiles(username);
+-- Create case-insensitive unique index on username for fast lookups and uniqueness
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_username_unique_idx ON public.profiles(LOWER(username));
 
 -- Create index on email for fast lookups
 CREATE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles(email);

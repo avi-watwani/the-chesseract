@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { createClient } from '@/app/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function SignUp() {
   const [username, setUsername] = useState('')
@@ -15,6 +16,8 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [needsVerification, setNeedsVerification] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -65,12 +68,13 @@ export default function SignUp() {
         return
       }
 
-      // Check if username is already taken
-      const { data: existingUsers, error: queryError } = await supabase
+      // Check if username is already taken (case-insensitive)
+      // Using ilike for case-insensitive comparison as extra safety
+      const { data: existingUsers } = await supabase
         .from('profiles')
         .select('username')
-        .eq('username', username.toLowerCase())
-        .single()
+        .ilike('username', username)
+        .maybeSingle()
 
       if (existingUsers) {
         setError('Username is already taken')
@@ -84,7 +88,7 @@ export default function SignUp() {
         password,
         options: {
           data: {
-            username: username.toLowerCase(),
+            username: username, // Preserve original case for display
           },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -238,28 +242,52 @@ export default function SignUp() {
 
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Create Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading || needsVerification}
-                  className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
+                  className="w-full bg-transparent text-white text-lg px-4 py-3 pr-12 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
-                  minLength={8}
+                  minLength={6}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                  disabled={loading || needsVerification}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
 
               <div className="relative">
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={loading || needsVerification}
-                  className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
+                  className="w-full bg-transparent text-white text-lg px-4 py-3 pr-12 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
-                  minLength={8}
+                  minLength={6}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                  disabled={loading || needsVerification}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
