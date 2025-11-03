@@ -7,14 +7,25 @@ import { createClient } from '@/app/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function SignUp() {
-  const [fullName, setFullName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [needsVerification, setNeedsVerification] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  const validateUsername = (username: string): boolean => {
+    // Must start with a letter
+    // Can contain letters, numbers, underscore, hyphen
+    // Can't end with underscore or hyphen
+    // Can't start with numbers
+    const usernameRegex = /^[a-zA-Z]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$/
+    return usernameRegex.test(username)
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,14 +34,46 @@ export default function SignUp() {
 
     try {
       // Validate inputs
-      if (!fullName.trim() || !email.trim() || !password.trim()) {
+      if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
         setError('All fields are required')
         setLoading(false)
         return
       }
 
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters')
+      // Validate username format
+      if (!validateUsername(username)) {
+        setError('Username must start with a letter, contain only letters, numbers, hyphens and underscores, and cannot end with hyphen or underscore')
+        setLoading(false)
+        return
+      }
+
+      if (username.length < 3) {
+        setError('Username must be at least 3 characters')
+        setLoading(false)
+        return
+      }
+
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters')
+        setLoading(false)
+        return
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        setLoading(false)
+        return
+      }
+
+      // Check if username is already taken
+      const { data: existingUsers, error: queryError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username.toLowerCase())
+        .single()
+
+      if (existingUsers) {
+        setError('Username is already taken')
         setLoading(false)
         return
       }
@@ -41,7 +84,7 @@ export default function SignUp() {
         password,
         options: {
           data: {
-            full_name: fullName,
+            username: username.toLowerCase(),
           },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -61,13 +104,19 @@ export default function SignUp() {
           return
         }
 
-        setSuccess(true)
-        // If email confirmation is required, show success message
-        // Otherwise redirect to home
-        setTimeout(() => {
-          router.push('/')
-          router.refresh()
-        }, 2000)
+        // Check if session was created (no email confirmation required)
+        if (data.session) {
+          // User is logged in immediately - redirect to home
+          setSuccess(true)
+          setTimeout(() => {
+            router.push('/')
+            router.refresh()
+          }, 1500)
+        } else {
+          // Email confirmation required - show verification message
+          setNeedsVerification(true)
+          setSuccess(true)
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred')
@@ -75,6 +124,14 @@ export default function SignUp() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEditEmail = () => {
+    setNeedsVerification(false)
+    setSuccess(false)
+    setPassword('') // Clear password for security
+    setConfirmPassword('') // Clear confirm password for security
+    setError(null)
   }
 
   return (
@@ -110,7 +167,34 @@ export default function SignUp() {
             Join Chesseract
           </h1>
 
-          {success && (
+          {success && needsVerification && (
+            <div className="bg-blue-500/20 border border-blue-500 text-blue-100 px-4 py-3 rounded-xl space-y-2">
+              <div className="flex items-start space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <div>
+                  <p className="font-semibold">Verification Email Sent!</p>
+                  <p className="text-sm mt-1">
+                    We've sent a verification link to <span className="font-medium">{email}</span>{' '}
+                    <button 
+                      onClick={handleEditEmail}
+                      className="text-blue-300 hover:text-blue-200 underline text-xs"
+                    >
+                      Not you?
+                    </button>
+                  </p>
+                  <p className="text-sm mt-2">
+                    Please check your inbox and click the verification link to activate your account. 
+                    Once verified, you can <Link href="/login" className="underline hover:text-blue-200">login here</Link>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {success && !needsVerification && (
             <div className="bg-green-500/20 border border-green-500 text-green-100 px-4 py-3 rounded-xl">
               Account created successfully! Redirecting...
             </div>
@@ -127,13 +211,17 @@ export default function SignUp() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Full Name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={loading || success}
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading || needsVerification}
                   className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
+                  minLength={3}
                 />
+                <p className="text-xs text-white/50 mt-1 px-4">
+                  Alphanumeric (hyphens and underscores allowed in between)
+                </p>
               </div>
 
               <div className="relative">
@@ -142,7 +230,7 @@ export default function SignUp() {
                   placeholder="Enter Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading || success}
+                  disabled={loading || needsVerification}
                   className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
                 />
@@ -154,31 +242,46 @@ export default function SignUp() {
                   placeholder="Create Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading || success}
+                  disabled={loading || needsVerification}
                   className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
-                  minLength={6}
+                  minLength={8}
+                />
+              </div>
+
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading || needsVerification}
+                  className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
+                  required
+                  minLength={8}
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading || success}
+              disabled={loading || needsVerification}
               className="w-full bg-white text-black text-lg font-medium py-3 rounded-xl mt-4 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
-          <div className="text-center">
-            <Link 
-              href="/login" 
-              className="text-white text-base hover:opacity-80 transition-opacity"
-            >
-              Already Have An Account? Login
-            </Link>
-          </div>
+          {!needsVerification && (
+            <div className="text-center">
+              <Link 
+                href="/login" 
+                className="text-white text-base hover:opacity-80 transition-opacity"
+              >
+                Already Have An Account? Login
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -129,7 +129,7 @@ const Navbar = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
                   <User className="h-5 w-5" />
-                  <span>{user.user_metadata?.full_name || user.email}</span>
+                  <span>{user.user_metadata?.username || user.email}</span>
                   <ChevronDown className="h-4 w-4" />
                 </button>
                 <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 transition-all duration-200 ${isUserMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
@@ -257,7 +257,7 @@ const Navbar = () => {
                 <div className="px-3 py-2 text-white">
                   <div className="flex items-center space-x-2">
                     <User className="h-5 w-5" />
-                    <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
+                    <span className="text-sm">{user.user_metadata?.username || user.email}</span>
                   </div>
                 </div>
                 <button 

@@ -7,12 +7,16 @@ import { createClient } from '@/app/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  const isEmail = (input: string): boolean => {
+    return input.includes('@')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,15 +25,34 @@ export default function Login() {
 
     try {
       // Validate inputs
-      if (!email.trim() || !password.trim()) {
-        setError('Email and password are required')
+      if (!emailOrUsername.trim() || !password.trim()) {
+        setError('Email/Username and password are required')
         setLoading(false)
         return
       }
 
-      // Sign in with Supabase
+      let loginEmail = emailOrUsername
+
+      // If not an email, treat as username and look up email
+      if (!isEmail(emailOrUsername)) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('username', emailOrUsername.toLowerCase())
+          .single()
+
+        if (profileError || !profileData) {
+          setError('Invalid username or password')
+          setLoading(false)
+          return
+        }
+
+        loginEmail = profileData.email
+      }
+
+      // Sign in with Supabase using email
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       })
 
@@ -95,10 +118,10 @@ export default function Login() {
             <div className="space-y-4">
               <div className="relative">
                 <input
-                  type="email"
-                  placeholder="Enter Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="Email or Username"
+                  value={emailOrUsername}
+                  onChange={(e) => setEmailOrUsername(e.target.value)}
                   disabled={loading}
                   className="w-full bg-transparent text-white text-lg px-4 py-3 rounded-xl border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/70 disabled:opacity-50"
                   required
