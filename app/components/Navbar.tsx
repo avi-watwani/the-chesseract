@@ -2,12 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
+import { createClient } from '@/app/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLearnOpen, setIsLearnOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +32,25 @@ const Navbar = () => {
     };
   }, []);
 
+  // Check for user session
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -35,6 +61,13 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+    setIsUserMenuOpen(false);
   };
 
   return (
@@ -87,20 +120,46 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          {/* Login/ Signup */}
+          {/* Login/ Signup or User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link 
-              href="/login"
-              className="text-white hover:text-blue-400 transition-colors"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              <div className="relative group">
+                <button 
+                  className="flex items-center space-x-2 text-white hover:text-blue-400 transition-colors"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
+                  <User className="h-5 w-5" />
+                  <span>{user.user_metadata?.full_name || user.email}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+                <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 transition-all duration-200 ${isUserMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                  <div className="py-1">
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login"
+                  className="text-white hover:text-blue-400 transition-colors"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -193,20 +252,40 @@ const Navbar = () => {
             Contact
           </Link>
           <div className="pt-4 pb-3 border-t border-gray-700">
-            <Link 
-              href="/login"
-              className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
-              onClick={closeMenu}
-            >
-              Log In
-            </Link>
-            <Link 
-              href="/signup"
-              className="block px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md mt-2"
-              onClick={closeMenu}
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              <>
+                <div className="px-3 py-2 text-white">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-5 w-5" />
+                    <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-3 py-2 text-white hover:bg-gray-800 rounded-md mt-2"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  href="/login"
+                  className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md"
+                  onClick={closeMenu}
+                >
+                  Log In
+                </Link>
+                <Link 
+                  href="/signup"
+                  className="block px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md mt-2"
+                  onClick={closeMenu}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
