@@ -21,7 +21,12 @@ export async function POST(request: NextRequest) {
       razorpay_payment_id,
       razorpay_signature,
       planName,
-    } = body;
+    } = body as {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+      planName: string;
+    };
 
     // Validate input
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {

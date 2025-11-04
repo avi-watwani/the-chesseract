@@ -22,7 +22,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { amount, currency, planName } = body;
+    const { amount, currency, planName } = body as {
+      amount: number;
+      currency: string;
+      planName: string;
+    };
 
     // Validate input
     if (!amount || !currency || !planName) {
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
       notes: {
         plan: planName,
         user_id: user.id,
-        user_email: user.email,
+        user_email: user.email || '',
       },
     };
 
