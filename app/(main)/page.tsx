@@ -1,8 +1,113 @@
+'use client';
+
 import PageContainer from '../components/PageContainer';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+
+// Razorpay type declaration
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+interface Plan {
+  name: string;
+  amount: number;
+  currency: string;
+  description: string;
+}
 
 export default function HomePage() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handlePayment = async (plan: Plan) => {
+    try {
+      setLoading(plan.name);
+
+      // Create order on backend
+      const response = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: plan.amount,
+          currency: plan.currency,
+          planName: plan.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+
+      const data = await response.json();
+
+      // Initialize Razorpay payment
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'The Chesseract',
+        description: `${plan.name} Plan - ${plan.description}`,
+        order_id: data.orderId,
+        handler: async function (response: any) {
+          // Verify payment on backend
+          try {
+            const verifyResponse = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                planName: plan.name,
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success) {
+              alert(`Payment successful! Welcome to ${plan.name} plan!`);
+              // Redirect to dashboard or success page
+              // window.location.href = '/dashboard';
+            } else {
+              alert('Payment verification failed. Please contact support.');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: '',
+        },
+        theme: {
+          color: '#9333ea', // Purple color matching your theme
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      setLoading(null);
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Failed to initiate payment. Please try again.');
+      setLoading(null);
+    }
+  };
+
   return (
     <PageContainer className="bg-black text-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -157,8 +262,17 @@ export default function HomePage() {
               </div>
 
               <div className="mt-auto">
-                <button className="w-full py-4 px-6 rounded-xl border-2 border-purple-600 text-purple-600 font-medium hover:bg-purple-600 hover:text-white transition-colors text-lg">
-                  Book a Demo
+                <button 
+                  onClick={() => handlePayment({
+                    name: 'Intermediate',
+                    amount: 2,
+                    currency: 'INR',
+                    description: 'For players ready to enhance their strategic thinking'
+                  })}
+                  disabled={loading !== null}
+                  className="w-full py-4 px-6 rounded-xl bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading === 'Intermediate' ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
             </div>
@@ -221,8 +335,17 @@ export default function HomePage() {
               </div>
 
               <div className="mt-auto">
-                <button className="w-full py-4 px-6 rounded-xl bg-white text-purple-600 font-medium hover:bg-purple-50 transition-colors text-lg">
-                  Book a Demo
+                <button 
+                  onClick={() => handlePayment({
+                    name: 'Beginner',
+                    amount: 1,
+                    currency: 'INR',
+                    description: 'Perfect for beginners starting their chess journey'
+                  })}
+                  disabled={loading !== null}
+                  className="w-full py-4 px-6 rounded-xl bg-white text-purple-600 font-medium hover:bg-purple-50 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading === 'Beginner' ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
             </div>
@@ -285,8 +408,17 @@ export default function HomePage() {
               </div>
 
               <div className="mt-auto">
-                <button className="w-full py-4 px-6 rounded-xl border-2 border-purple-600 text-purple-600 font-medium hover:bg-purple-600 hover:text-white transition-colors text-lg">
-                  Book a Demo
+                <button 
+                  onClick={() => handlePayment({
+                    name: 'Advanced',
+                    amount: 5,
+                    currency: 'INR',
+                    description: 'For serious players aiming for mastery'
+                  })}
+                  disabled={loading !== null}
+                  className="w-full py-4 px-6 rounded-xl bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading === 'Advanced' ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
             </div>
@@ -475,4 +607,4 @@ export default function HomePage() {
       </div>
     </PageContainer>
   );
-} 
+}

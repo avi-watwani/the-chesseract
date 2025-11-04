@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'The Chesseract',
@@ -15,6 +16,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen bg-gray-900 text-white">
         {children}
+        <Script 
+          id="razorpay-checkout-js"
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   )
