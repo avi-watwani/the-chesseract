@@ -3,7 +3,10 @@
 import PageContainer from '../components/PageContainer';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/app/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 
 // Razorpay type declaration
 declare global {
@@ -21,8 +24,38 @@ interface Plan {
 
 export default function HomePage() {
   const [loading, setLoading] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+  const router = useRouter();
+
+  // Check authentication status
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handlePayment = async (plan: Plan) => {
+    // Check if user is authenticated
+    if (!user) {
+      // Redirect to login page
+      alert('Please sign in to purchase a plan');
+      router.push('/login');
+      return;
+    }
+
     try {
       setLoading(plan.name);
 
@@ -72,9 +105,9 @@ export default function HomePage() {
             const verifyData = await verifyResponse.json();
 
             if (verifyData.success) {
-              alert(`Payment successful! Welcome to ${plan.name} plan!`);
-              // Redirect to dashboard or success page
-              // window.location.href = '/dashboard';
+              alert(`Payment successful! Welcome to ${plan.name} plan! Your subscription is now active.`);
+              // Reload page to update navbar with new plan
+              window.location.reload();
             } else {
               alert('Payment verification failed. Please contact support.');
             }
@@ -201,7 +234,7 @@ export default function HomePage() {
         </section>
 
         {/* Course Levels Section */}
-        <section className="mb-32">
+        <section id="plans" className="mb-32">
           <h2 className="text-4xl font-bold mb-8 text-center">Check Out Our Plans</h2> <br /><br />
           <div className="grid grid-cols-3 gap-8">
             {/* Intermediate Level Card */}
@@ -216,7 +249,7 @@ export default function HomePage() {
                     <span className="ml-2 text-purple-600 text-sm font-medium">SAVE 75%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">$149</span>
+                    <span className="text-5xl font-bold">₹14999</span>
                     <span className="text-gray-600 ml-2">/mo</span>
                   </div>
                 </div>
@@ -265,7 +298,7 @@ export default function HomePage() {
                 <button 
                   onClick={() => handlePayment({
                     name: 'Intermediate',
-                    amount: 2,
+                    amount: 14999,
                     currency: 'INR',
                     description: 'For players ready to enhance their strategic thinking'
                   })}
@@ -295,7 +328,7 @@ export default function HomePage() {
                     <span className="ml-2 text-white text-sm font-medium">SAVE 56%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">$89</span>
+                    <span className="text-5xl font-bold">₹7999</span>
                     <span className="text-purple-200 ml-2">/mo</span>
                   </div>
                 </div>
@@ -338,7 +371,7 @@ export default function HomePage() {
                 <button 
                   onClick={() => handlePayment({
                     name: 'Beginner',
-                    amount: 1,
+                    amount: 7999,
                     currency: 'INR',
                     description: 'Perfect for beginners starting their chess journey'
                   })}
@@ -362,7 +395,7 @@ export default function HomePage() {
                     <span className="ml-2 text-purple-600 text-sm font-medium">SAVE 64%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">$249</span>
+                    <span className="text-5xl font-bold">₹24999</span>
                     <span className="text-gray-600 ml-2">/mo</span>
                   </div>
                 </div>
@@ -411,7 +444,7 @@ export default function HomePage() {
                 <button 
                   onClick={() => handlePayment({
                     name: 'Advanced',
-                    amount: 5,
+                    amount: 24999,
                     currency: 'INR',
                     description: 'For serious players aiming for mastery'
                   })}

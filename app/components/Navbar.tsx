@@ -2,16 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, CreditCard, Calendar } from 'lucide-react';
 import { createClient } from '@/app/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+
+interface Subscription {
+  plan_name: string;
+  status: string;
+  next_renewal_at: string | null;
+}
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLearnOpen, setIsLearnOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const supabase = createClient();
   const router = useRouter();
@@ -32,24 +39,43 @@ const Navbar = () => {
     };
   }, []);
 
-  // Check for user session
+  // Check for user session and subscription
   useEffect(() => {
-    const getUser = async () => {
+    const getUserAndSubscription = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // Fetch user's subscription
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select('plan_name, status, next_renewal_at')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        setSubscription(subData);
+      } else {
+        setSubscription(null);
+      }
     };
 
-    getUser();
+    getUserAndSubscription();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        getUserAndSubscription();
+      } else {
+        setSubscription(null);
+      }
     });
 
     return () => {
-      subscription.unsubscribe();
+      authSub.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -129,10 +155,57 @@ const Navbar = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
                   <User className="h-5 w-5" />
-                  <span>{user.user_metadata?.username || user.email}</span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm">{user.user_metadata?.username || user.email?.split('@')[0]}</span>
+                    {subscription && (
+                      <span className="text-xs text-purple-400">{subscription.plan_name} Plan</span>
+                    )}
+                  </div>
                   <ChevronDown className="h-4 w-4" />
                 </button>
-                <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 transition-all duration-200 ${isUserMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                <div className={`absolute right-0 mt-2 w-80 rounded-lg shadow-xl bg-gray-800 ring-1 ring-black ring-opacity-5 transition-all duration-200 ${isUserMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                  <div className="p-4 border-b border-gray-700">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                        <User className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">{user.user_metadata?.username || 'User'}</p>
+                        <p className="text-gray-400 text-sm">{user.email}</p>
+                      </div>
+                    </div>
+                    
+                    {subscription ? (
+                      <div className="bg-gray-700/50 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-300 text-sm flex items-center">
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Current Plan
+                          </span>
+                          <span className="text-purple-400 font-semibold">{subscription.plan_name}</span>
+                        </div>
+                        {subscription.next_renewal_at && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-300 text-sm flex items-center">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Renewal On
+                            </span>
+                            <span className="text-gray-400 text-sm">
+                              {new Date(subscription.next_renewal_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-gray-700/50 rounded-lg p-3">
+                        <p className="text-gray-400 text-sm">No active subscription</p>
+                        <Link href="/#plans" className="text-purple-400 text-sm hover:text-purple-300">
+                          View Plans →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="py-1">
                     <button 
                       onClick={handleLogout}
@@ -255,10 +328,26 @@ const Navbar = () => {
             {user ? (
               <>
                 <div className="px-3 py-2 text-white">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 mb-2">
                     <User className="h-5 w-5" />
                     <span className="text-sm">{user.user_metadata?.username || user.email}</span>
                   </div>
+                  {subscription && (
+                    <div className="bg-gray-800 rounded-lg p-2 mt-2 text-xs">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-400">Plan:</span>
+                        <span className="text-purple-400 font-semibold">{subscription.plan_name}</span>
+                      </div>
+                      {subscription.next_renewal_at && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Renewal:</span>
+                          <span className="text-gray-300">
+                            {new Date(subscription.next_renewal_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <button 
                   onClick={handleLogout}

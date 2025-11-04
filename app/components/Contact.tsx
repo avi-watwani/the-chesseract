@@ -99,7 +99,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1 text-white">Phone</h4>
-                    <a href="tel:+971525759348" className="text-gray-300 hover:underline">+971 52 575 9348</a>
+                    <a href="tel:+918390226655" className="text-gray-300 hover:underline">+91 8390226655</a>
                   </div>
                 </div>
                 
@@ -109,7 +109,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1 text-white">Location</h4>
-                    <p className="text-gray-300">Dubai, UAE</p>
+                    <p className="text-gray-300">Mumbai, India</p>
                   </div>
                 </div>
               </div>
