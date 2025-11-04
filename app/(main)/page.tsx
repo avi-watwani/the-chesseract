@@ -249,7 +249,7 @@ export default function HomePage() {
                     <span className="ml-2 text-purple-600 text-sm font-medium">SAVE 75%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">₹14999</span>
+                    <span className="text-5xl font-bold">₹14,999</span>
                     <span className="text-gray-600 ml-2">/mo</span>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function HomePage() {
                     <span className="ml-2 text-white text-sm font-medium">SAVE 56%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">₹7999</span>
+                    <span className="text-5xl font-bold">₹7,999</span>
                     <span className="text-purple-200 ml-2">/mo</span>
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function HomePage() {
                     <span className="ml-2 text-purple-600 text-sm font-medium">SAVE 64%</span>
                   </div>
                   <div className="flex items-baseline">
-                    <span className="text-5xl font-bold">₹24999</span>
+                    <span className="text-5xl font-bold">₹24,999</span>
                     <span className="text-gray-600 ml-2">/mo</span>
                   </div>
                 </div>
