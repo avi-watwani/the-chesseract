@@ -13,9 +13,32 @@ import { useArrows } from '../../hooks/useArrows';
 import { soundManager } from '../../utils/sounds';
 import { Clock, Users, Flag, Scale } from 'lucide-react';
 import { Piece } from '../../types/chess';
+import { createClient } from '../../utils/supabase/client';
 
 export default function PlayPage() {
-  const { socket, gameState, isPlayerTurn, setIsPlayerTurn, findGame, cancelSearch, makeSocketMove, offerDraw, resign, searchingForGame } = useSocketGame();
+  const [username, setUsername] = useState<string>('');
+  const supabase = createClient();
+  
+  // Fetch the logged-in user's username
+  useEffect(() => {
+    const fetchUsername = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUsername(profile.username);
+        }
+      }
+    };
+    fetchUsername();
+  }, [supabase]);
+
+  const { socket, gameState, isPlayerTurn, setIsPlayerTurn, findGame, cancelSearch, makeSocketMove, offerDraw, resign, searchingForGame } = useSocketGame(username);
   const { board, selectedSquare, setSelectedSquare, makeMove, resetBoard } = useBoardState();
   const { calculateValidMoves, checkGameStatus } = useGameLogic(board, gameState.playerColor || 'white');
   const { moveHistory, addMove, reset: resetMoveHistory } = useMoveHistory();

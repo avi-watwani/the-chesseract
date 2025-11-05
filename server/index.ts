@@ -46,10 +46,11 @@ io.on('connection', (socket) => {
 
   socket.on('findGame', (data) => {
     const userId = data?.userId || socket.id; // fallback to socket.id if no userId provided
+    const username = data?.username || `Player ${socket.id.slice(0, 4)}`; // Use provided username or fallback
     const player: Player = {
       id: socket.id,
       userId,
-      name: `Player ${socket.id.slice(0, 4)}`,
+      name: username,
       socket,
       connected: true
     };

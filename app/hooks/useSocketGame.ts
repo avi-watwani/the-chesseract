@@ -35,7 +35,7 @@ function getUserId(): string {
   return userId;
 }
 
-export const useSocketGame = (): SocketGameHook => {
+export const useSocketGame = (username: string): SocketGameHook => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState>({ status: 'waiting' });
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
@@ -167,12 +167,12 @@ export const useSocketGame = (): SocketGameHook => {
     if (socket && socket.connected) {
       setSearchingForGame(true);
       const userId = getUserId();
-      socket.emit('findGame', { userId });
+      socket.emit('findGame', { userId, username: username || 'Anonymous' });
     } else {
       console.error('Socket not connected');
       setSearchingForGame(false);
     }
-  }, [socket]);
+  }, [socket, username]);
 
   const cancelSearch = useCallback(() => {
     if (socket && socket.connected) {
