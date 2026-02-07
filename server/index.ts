@@ -2,10 +2,27 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  // Handle plain HTTP requests (for health checks and Let's Encrypt verification)
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Chesseract WebSocket Server is running');
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+  }
+});
+
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://socket.chesseractindia.com",
+      "https://chesseractindia.com",
+      "https://www.chesseractindia.com",
+      "https://socket.chesseractindia.com"
+    ],
     methods: ["GET", "POST"],
     credentials: true
   }
